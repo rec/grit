@@ -1,0 +1,4 @@
+grit
+====
+
+rationalized git workflowo
