@@ -1,8 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
-from os import getcwd
-from os.path import basename, dirname, isdir, join
+import sys
 
 from grit import Call
 from grit import File
@@ -29,12 +28,17 @@ def _match(root, prefix):
     for dirpath, dirnames, filenames in os.walk(root):
         for d in dirnames:
             if d.startswith(prefix):
-                yield os.path.join(dirpath, d)
+                d = os.path.join(dirpath, d)
+                yield d, d
         if not os.path.basename(dirpath).startswith(prefix):
             for f in filenames:
                 if f.startswith(prefix):
-                    yield dirpath
+                    yield dirpath, os.path.join(f)
                     break
+
+def _print_match(match, display_root):
+    print(os.path.relpath(match[1], display_root), file=sys.stderr)
+    print(match[0])
 
 def find(prefix, suffix=''):
     root = Git.root()
@@ -47,6 +51,7 @@ def find(prefix, suffix=''):
         raise ValueError('No file specified for find')
     settings = Project.settings('find')
     find_root = os.path.join(root, settings['find_root'])
+    display_root = os.path.join(root, settings['display_root'])
     matches = sorted(list(_match(find_root, prefix)))
 
     if not matches:
@@ -54,7 +59,8 @@ def find(prefix, suffix=''):
     try:
         index = matches.index(os.getcwd())
     except ValueError:
-        print(matches[0] if forward else matches[-1])
+        _print_match(matches[0] if forward else matches[-1], display_root)
     else:
-        print(matches[(index + (1 if forward else -1)) % len(matches)])
+        _print_match(matches[(index + (1 if forward else -1)) % len(matches)],
+                     display_root)
 #

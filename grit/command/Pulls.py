@@ -5,9 +5,16 @@ from collections import namedtuple
 import requests
 
 from grit import Settings
+from grit.command import Open
 
 HELP = """
 List all the outstanding pull requests for the current project.
+
+   git p[ulls] [o[pen]]
+
+If the optional "open" argument is passed in, open the pull page in the browser
+instead.
+
 """
 
 _PULL_URL = 'https://github.com/{project_user}/{project}/pulls'
@@ -22,12 +29,14 @@ class Pull(namedtuple('Pull', 'user branch number description')):
         br = '%s:%s' % (self.user, self.branch)
         return self.FORMAT % (self.number, br, self.description)
 
-def get_pulls():
+def _pull_urls():
     settings = {'project': Settings.PROJECT,
                 'project_user': Settings.PROJECT_USER}
+    return _PULL_URL.format(**settings), _PULL_HREF.format(**settings)
 
-    url = _PULL_URL.format(**settings)
-    pull_href = _PULL_HREF.format(**settings)
+
+def get_pulls():
+    url, pull_href = _pull_urls()
     soup = bs4.BeautifulSoup(requests.get(url).text)
     pulls = []
     for s in soup.find_all('a', attrs='js-navigation-open'):
@@ -41,7 +50,17 @@ def get_pulls():
             branches.append(s.text.strip().split(':', 1))
     return [Pull(*(b + p)) for b, p in zip(branches, pulls)]
 
-def pulls():
-    for p in get_pulls():
-        print(p)
+def open_pulls():
+    url, _ = _pull_urls()
+    Open.open_url(url)
+
+def pulls(arg=''):
+    if arg:
+        if 'open'.startswith(arg):
+            open_pulls()
+        else:
+            raise ValueError("Can't understand pull argument '%s'" % arg)
+    else:
+        for p in get_pulls():
+            print(p)
  #

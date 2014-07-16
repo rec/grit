@@ -26,9 +26,11 @@ _OPEN_COMMANDS = {
 
 _URL = 'https://github.com/{user}/{project}/tree/{branch}/{path}'
 
+def open_url(url):
+    Call.call('%s %s' % (_OPEN_COMMANDS[platform.system()], url))
+
 def open(filename=''):
-    plat = platform.system()
-    if not plat in _OPEN_COMMANDS:
+    if not platform.system() in _OPEN_COMMANDS:
         raise ValueError("Can't open a URL for platform.system() = " + plat)
     branch = Git.branch()
     full_path = os.getcwd()
@@ -50,4 +52,4 @@ def open(filename=''):
         path=os.path.relpath(full_path, Git.root()),
         project=Settings.PROJECT,
         user=Settings.USER)
-    Call.call('%s %s' % (_OPEN_COMMANDS[plat], url))
+    open_url(url)

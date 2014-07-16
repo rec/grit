@@ -1,1 +1,4 @@
-{"find_root": "src/ripple"}
+{
+    "find_root": "src/ripple",
+    "display_root": "src"
+}
