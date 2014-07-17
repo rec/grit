@@ -72,4 +72,5 @@ def clone(branch='', directory=''):
     Call.for_each(br.format(**settings), cwd=directory)
     print('***** Created %s, branch %s *****' % (directory, branch))
     Test.run_test(directory)
+    print('***** Tested %s, branch %s *****' % (directory, branch))
 #

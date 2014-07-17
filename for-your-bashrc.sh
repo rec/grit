@@ -5,8 +5,18 @@ function + () {
   cd `grit + $*`
 }
 
+function ++ () {
+  cd `grit + $*`
+  cd `grit + $*`
+}
+
 # previous root
 function - () {
+  cd `grit - $*`
+}
+
+function -- () {
+  cd `grit - $*`
   cd `grit - $*`
 }
 
