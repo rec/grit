@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from os import getcwd
+import os
 from os.path import basename, dirname, isdir, join
 
 from grit import Call
@@ -50,12 +50,13 @@ def clone(branch='', directory=''):
 
     project = Settings.PROJECT
 
-    root = Git.root(getcwd())
+    root = Git.root(os.getcwd())
     if root:
         directory = directory or basename(root)
         root = dirname(root)
     else:
        directory = directory or project
+       root = os.getcwd()
 
     directory = File.next_version(join(root, directory))
     settings.update(
