@@ -30,6 +30,6 @@ public:
 private:
 }};
 
-}}
+}} // ripple
 
 #endif
