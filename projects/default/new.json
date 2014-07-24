@@ -1,1 +1,4 @@
-{"include_root": "src"}
+{
+    "include_root": "src",
+    "remake": true
+}
