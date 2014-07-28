@@ -9,7 +9,6 @@ from grit import Git
 from grit import Project
 from grit import Settings
 from grit.command import Test
-from grit.command import Remotes
 
 HELP = """
 grit clone [branch] [directory]
@@ -37,6 +36,15 @@ git clone git@github.com:{user}/{project}.git --branch {base_branch} {directory}
 """
 
 _BRANCH = 'git checkout {new_flag} {branch}'
+
+def remotes(cwd=None):
+    value = Call.call_raw('git remote', cwd=cwd)
+    remotes = set(value.split())
+    for nickname, user in Project.settings('remotes').items():
+        if nickname not in remotes:
+            remote = _REMOTE.format(
+                nickname=nickname, user=user, project=Settings.PROJECT)
+            Call.call(remote, cwd=cwd)
 
 def clone(branch='', directory=''):
     settings = Project.settings('clone')
@@ -68,8 +76,7 @@ def clone(branch='', directory=''):
     Call.for_each(_CLONE.format(**settings), cwd=root)
     branches = Git.branch(cwd=directory)
 
-    Remotes.remotes(cwd=directory)
-
+    remotes(cwd=directory)
 
     br = _OLD_BRANCH if branch == base_branch else _NEW_BRANCH
     Call.for_each(br.format(**settings), cwd=directory)

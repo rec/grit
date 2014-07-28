@@ -9,7 +9,6 @@ from grit import Git
 from grit import Project
 from grit import Settings
 from grit.command import Test
-from grit.command import Remotes
 
 HELP = """
 grit find prefix [-]
