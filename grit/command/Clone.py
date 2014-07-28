@@ -27,23 +27,26 @@ grit clone [branch] [directory]
 
     If the branch is not given, it defaults to the base_branch of your project
     (probably "develop").
+
+    If the branch name contains a :, it's a remote branch.  For account names,
+    you can use either the full name or the remote nickname.
 """
 
 _CLONE = """
 git clone git@github.com:{user}/{project}.git --branch {base_branch} {directory}
 """
 
-_NEW_BRANCH = """
-git checkout -b {branch}
-git push --set-upstream origin {branch}
-"""
-
-_OLD_BRANCH = 'git checkout {branch}'
+_BRANCH = 'git checkout {new_flag} {branch}'
 
 def clone(branch='', directory=''):
     settings = Project.settings('clone')
     base_branch = settings['base_branch']
     branch = branch or base_branch
+
+    if ':' in branch:
+        user, branch = branch.split(':', 1)
+    else:
+        user = None
 
     project = Settings.PROJECT
 
@@ -63,7 +66,10 @@ def clone(branch='', directory=''):
         user=Settings.USER,
     )
     Call.for_each(_CLONE.format(**settings), cwd=root)
+    branches = Git.branch(cwd=directory)
+
     Remotes.remotes(cwd=directory)
+
 
     br = _OLD_BRANCH if branch == base_branch else _NEW_BRANCH
     Call.for_each(br.format(**settings), cwd=directory)

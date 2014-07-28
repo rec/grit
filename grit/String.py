@@ -11,3 +11,10 @@ def split_version(name):
 
 def compare_version(x, y):
     return cmp(split_version(x), split_version(y))
+
+def try_attr(obj, name):
+    attr = getattr(obj, name, None)
+    return attr() if attr else obj
+
+def split_safe(s):
+    return try_attr(s, 'split')

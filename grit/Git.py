@@ -30,10 +30,16 @@ def select(prefix=''):
         return is_git_dir(f) and os.path.basename(f).startswith(prefix)
     return selector
 
-def branch(path=None):
-    error, results = Call.call_value('git status')
+def branch(**kwds):
+    error, results = Call.call_value('git status', **kwds)
     if error:
         raise ValueError("Can't get git status, error = " + error)
     return results.splitlines()[0].split()[-1]
 
-#
+def branches(path=None):
+    error, results = Call.call_value('git status', **kwds)
+    if error:
+        raise ValueError("Can't get git status, error = " + error)
+    return results.splitlines()[0].split()[-1]
+
+'https://github.com/$user/rippled/branches/all'

@@ -4,15 +4,19 @@ import os.path
 import subprocess
 
 from grit import File
+from grit.String import split_safe
 
 DIRECT_CALL = True
 
-def try_attr(obj, name):
-    attr = getattr(obj, name, None)
-    return attr() if attr else obj
+def call_raw(command, **kwds):
+    try:
+        subprocess.check_output(split_safe(command), **kwds)
+    except subprocess.CalledProcessError as e:
+        raise ValueError('Couldn\'t execute "%s", errorcode=%s' %
+                         (command.strip(), e.returncode))
 
 def call(command, callback=None, **kwds):
-    cmd = try_attr(command, 'split')
+    cmd = split_safe(command)
     returncode = 0
     error = ''
     if callback:
@@ -31,7 +35,7 @@ def call(command, callback=None, **kwds):
     return returncode
 
 def call_value(command, **kwds):
-    cmd = try_attr(command, 'split')
+    cmd = split_safe(command)
     try:
         return 0, subprocess.check_output(cmd, **kwds)
     except subprocess.CalledProcessError as e:
@@ -53,4 +57,3 @@ def for_each_directory(
         before and before(f)
         call(command, cwd=f, **kwds)
         after and after(f)
-#

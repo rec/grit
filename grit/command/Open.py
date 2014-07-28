@@ -16,6 +16,26 @@ grit open [filename]
     opens the current directory in the browser.
 """
 
+"""
+
+What should we be able to open?
+
+* The current directory.
+* A file.
+* A found file.
+
+in
+
+* our repo
+* the upstream repo
+* some other repo.
+
+And:
+* A pull request.
+* the pull request for this branch, if any.
+
+"""
+
 SAFE = True
 
 _OPEN_COMMANDS = {
