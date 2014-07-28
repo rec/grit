@@ -9,11 +9,8 @@ from grit import Settings
 from grit import Git
 
 HELP = """
-
-    grit new filename [...filename]
-
-Create new files using the project templates.
-
+grit new filename [...filename]
+    Create new files using the project templates.
 """
 
 SAFE = True

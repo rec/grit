@@ -6,10 +6,8 @@ from grit import Project
 from grit import Settings
 
 HELP = """
-
-    grit test
-
-Run the test for the current project.
+grit t[est]
+    Run the test for the current project.
 """
 
 def run_test(cwd=None):

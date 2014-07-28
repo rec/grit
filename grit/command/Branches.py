@@ -11,23 +11,22 @@ from grit.command import Pulls
 BRANCH_COMMAND = 'git branch'
 
 HELP = """
-    grit branches [prefix]
+grit branches [prefix]
+    List all git repositories and branches.
 
-List all git repositories and branches.
+    If the current directory is contained in a git repository, list all branches
+    in all repositories parallel to the current directory.
 
-If the current directory is contained in a git repository, list all branches in
-all repositories parallel to the current directory.
+    If you aren't in a git repository, list all git branches in directories
+    contained in the current directory.
 
-If you aren't in a git repository, list all git branches in directories
-contained in the current directory.
+    If prefix is set, only display branches in repositories that start with that
+    prefix.
 
-If prefix is set, only display branches in repositories that start with that
-prefix.
+    The current branch in each repository is marked with a star (*).
 
-The current branch in each repository is marked with a star (*).
-
-A branch which has a current pull request out is marked with an
-exclamation mark (!).
+    A branch which has a current pull request out is marked with an
+    exclamation mark (!).
 """
 
 SAFE = True

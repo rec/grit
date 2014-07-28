@@ -10,35 +10,31 @@ from grit import Project
 from grit.CommandList import CommandList
 
 MAIN_HELP = """
-  grit cd [command]
+grit cd [command]
+    A command to help change directories.
 
-A command to help change directories.  Often passed to the shell's cd command,
-like this:
-
-$ cd `grit cd +`
+    Often passed to the shell's cd command, like this:
+        $ cd `grit cd +`
 """
 
 ROOT_HELP = """
-  grit {cd}^
-  grit {cd}6
-
-Print the top-level directory in this git project.
+grit {cd}^
+grit {cd}6
+    Print the top-level directory in this git project.
 """
 
 FORWARD_HELP = """
-  grit {cd}+ [<prefix>]
-  grit {cd}= [<prefix>]
-
-Print the the next git project sibling to this one.
-Only considers directories that start with prefix, if it's set.
+grit {cd}+ [<prefix>]
+grit {cd}= [<prefix>]
+    Print the the next git project sibling to this one.
+    Only considers directories that start with prefix, if it's set.
 """
 
 BACK_HELP = """
-  grit {cd}- [<prefix>]
-  grit {cd}_ [<prefix>]
-
-Go to the previous git project sibling to this one.
-Only considers directories that start with prefix, if it's set.
+grit {cd}- [<prefix>]
+grit {cd}_ [<prefix>]
+    Go to the previous git project sibling to this one.
+    Only considers directories that start with prefix, if it's set.
 """
 
 HELP = '\n'.join(

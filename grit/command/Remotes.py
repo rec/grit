@@ -5,7 +5,8 @@ from grit import Project
 from grit import Settings
 
 HELP = """
-Add all the remotes listed in the project's remotes.json file.
+grit r[emote]
+    Add all the remotes listed in the project's remotes.json file.
 """
 
 _REMOTE = """

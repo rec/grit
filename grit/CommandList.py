@@ -28,6 +28,9 @@ class CommandList(object):
                 v = [v]
             self.register_one(k, *v)
 
+    def keys(self):
+        return self.registry.keys()
+
     def register_one(self, name, function, help='', safe=False):
         assert name not in self.registry
         self.registry[name] = Command(function, help, safe)
@@ -49,6 +52,7 @@ class CommandList(object):
 
     def get(self, command):
         return self._get(command)[1]
+
     def run(self, command, *args):
         return self.get(command).function(*args)
 

@@ -12,24 +12,21 @@ from grit.command import Test
 from grit.command import Remotes
 
 HELP = """
+grit clone [branch] [directory]
+    Gets a fresh clone of the current project containing a new branch.
 
-    grit clone [branch] [directory]
+    Goes to the directory above the git directory containing the current path,
+    clones a copy of the current project under the name directory, checks out
+    the branch name given, adds git remotes, then runs some tests.
 
-Gets a fresh clone of the current project containing a new branch.
+    The list of tests and the list of git remotes is found in the settings
+    directory for your project.
 
-Goes to the directory above the git directory containing the current path,
-clones a copy of the current project under the name directory, checks out the
-branch name given, adds git remotes, then runs some tests.
+    If the directory name is not given, it adds a numeric suffix to the current
+    directory.
 
-The list of tests and the list of git remotes is found in the settings directory
-for your project.
-
-If the directory name is not given, it adds a numeric suffix to the current
-directory.
-
-If the branch is not given, it defaults to the base_branch of your project
-(probably "develop").
-
+    If the branch is not given, it defaults to the base_branch of your project
+    (probably "develop").
 """
 
 _CLONE = """

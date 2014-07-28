@@ -9,12 +9,11 @@ from grit import Git
 from grit import Settings
 
 HELP = """
-    grit open [filename]
+grit open [filename]
+    Open the filename as a Github URL in the browser.
 
-Open the filename as a Github URL in the browser.
-
-Selects the first file that starts with filename.  If filename is missing,
-opens the current directory in the browser.
+    Selects the first file that starts with filename.  If filename is missing,
+    opens the current directory in the browser.
 """
 
 SAFE = True

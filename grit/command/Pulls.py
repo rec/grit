@@ -8,13 +8,11 @@ from grit import Settings
 from grit.command import Open
 
 HELP = """
-List all the outstanding pull requests for the current project.
+git p[ulls] [o[pen]]
+    List all the outstanding pull requests for the current project.
 
-   git p[ulls] [o[pen]]
-
-If the optional "open" argument is passed in, open the pull page in the browser
-instead.
-
+    If the optional "open" argument is passed in, open the pull page in the
+    browser instead.
 """
 
 _PULL_URL = 'https://github.com/{project_user}/{project}/pulls'
@@ -33,7 +31,6 @@ def _pull_urls():
     settings = {'project': Settings.PROJECT,
                 'project_user': Settings.PROJECT_USER}
     return _PULL_URL.format(**settings), _PULL_HREF.format(**settings)
-
 
 def get_pulls():
     url, pull_href = _pull_urls()

@@ -12,14 +12,11 @@ from grit.command import Test
 from grit.command import Remotes
 
 HELP = """
+grit find prefix [-]
+    Prints the next directory in the current git project that contains a file
+    that starts with this prefix.
 
-    grit find prefix [-]
-
-Prints the next directory in the current git project that contains a file that
-starts with this prefix.
-
-With optional -, prints the previous directory.
-
+    With optional -, prints the previous directory.
 """
 
 SAFE = True

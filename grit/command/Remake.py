@@ -8,11 +8,8 @@ from grit import Project
 from grit import Git
 
 HELP = """
-
-    grit remake
-
-Rebuild the build files (Makefile, Sconstruct or vcxproj) for this project.
-
+grit remake
+    Rebuild the build files (Makefile, Sconstruct or vcxproj) for this project.
 """
 
 SAFE = True
