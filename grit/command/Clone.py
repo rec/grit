@@ -8,6 +8,7 @@ from grit import File
 from grit import Git
 from grit import Project
 from grit import Settings
+from grit.command import Pulls
 from grit.command import Test
 
 HELP = """
@@ -46,6 +47,18 @@ def remotes(cwd=None):
                 nickname=nickname, user=user, project=Settings.PROJECT)
             Call.call(remote, cwd=cwd)
 
+def parse_branch(branch):
+    if ':' in branch:
+        user, branch = branch.split(':', 1)
+    else:
+        user = None
+
+    try:
+        pull = int(branch)
+    except:
+        return user, branch
+
+
 def clone(branch='', directory=''):
     settings = Project.settings('clone')
     base_branch = settings['base_branch']
@@ -56,21 +69,19 @@ def clone(branch='', directory=''):
     else:
         user = None
 
-    project = Settings.PROJECT
-
     root = Git.root(os.getcwd())
     if root:
         directory = directory or basename(root)
         root = dirname(root)
     else:
-       directory = directory or project
+       directory = directory or Settings.PROJECT
        root = os.getcwd()
 
     directory = File.next_version(join(root, directory))
     settings.update(
         branch=branch,
         directory=directory,
-        project=project,
+        project=Settings.PROJECT,
         user=Settings.USER,
     )
     Call.for_each(_CLONE.format(**settings), cwd=root)
