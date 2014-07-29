@@ -1,6 +1,8 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import json
 import os
+import urllib2
 
 from grit import Call
 from grit import File
@@ -36,10 +38,8 @@ def branch(**kwds):
         raise ValueError("Can't get git status, error = " + error)
     return results.splitlines()[0].split()[-1]
 
-def branches(path=None):
-    error, results = Call.call_value('git status', **kwds)
-    if error:
-        raise ValueError("Can't get git status, error = " + error)
-    return results.splitlines()[0].split()[-1]
+API = 'https://api.github.com'
 
-'https://github.com/$user/rippled/branches/all'
+def api(*parts):
+    url = '/'.join((API, ) + parts)
+    return json.load(urllib2.urlopen(url))
