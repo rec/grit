@@ -16,5 +16,8 @@ def try_attr(obj, name):
     attr = getattr(obj, name, None)
     return attr() if attr else obj
 
-def split_safe(s):
-    return try_attr(s, 'split')
+def split_safe(s, attribute='split'):
+    return try_attr(s, attribute)
+
+def banner(*parts):
+    print('\n*** %s ***\n' % ' '.join(parts))

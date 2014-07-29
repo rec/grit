@@ -43,3 +43,23 @@ API = 'https://api.github.com'
 def api(*parts):
     url = '/'.join((API, ) + parts)
     return json.load(urllib2.urlopen(url))
+
+def pulls():
+    result = {}
+    for p in api('repos', Settings.PROJECT_USER, Settings.PROJECT, 'pulls'):
+        result[p['number']] = p['head']['label'], p['title']
+    return result
+
+def pull_branches(user):
+    result = []
+    for number, (branch, _) in pulls().items():
+        u, b = branch.split(':')
+        if u == user:
+            result.append(b)
+    return result
+
+def branches(user):
+    result = []
+    for b in api('repos', user, Settings.PROJECT, 'branches'):
+        result.append(b['name'])
+    return result

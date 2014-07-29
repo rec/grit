@@ -16,6 +16,7 @@ from grit.command import New
 from grit.command import Open
 from grit.command import Pulls
 from grit.command import Remake
+from grit.command import Start
 from grit.command import Test
 
 from grit.CommandList import CommandList
@@ -24,7 +25,7 @@ import os
 import sys
 
 _COMMANDS = CommandList(
-    Amend, Branches, Clone, Help, Find, New, Open, Pulls, Remake, Test)
+    Amend, Branches, Clone, Help, Find, New, Open, Pulls, Remake, Start, Test)
 
 _COMMANDS.register(**CD.COMMAND_LIST)
 

@@ -20,13 +20,8 @@ SAFE = True
 
 _FORMATS = '#%d. %s\n    %s\n', '#%s. %-24s  %s'
 
-def _to_string(pull, short):
-    return _FORMATS[bool(short)] % pull
-
-def _raw_pulls():
-    for p in Git.api('repos', Settings.PROJECT_USER, Settings.PROJECT, 'pulls'):
-        yield p['number'], p['head']['label'], p['title']
-
+def _to_string(short, number, branch, title):
+    return _FORMATS[bool(short)] % (number, branch, title)
 
 def _pull_urls():
     settings = {'project': Settings.PROJECT,
@@ -42,6 +37,5 @@ def pulls(arg=''):
     if arg and not short:
         raise ValueError("Can't understand pull argument '%s'" % arg)
 
-    for p in _raw_pulls():
-        print(_to_string(p, short))
- #
+    for number, p in sorted(Git.pulls().items()):
+        print(_to_string(short, number, *p))

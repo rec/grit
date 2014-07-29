@@ -6,7 +6,6 @@ from grit import Call
 from grit import Git
 from grit import Project
 from grit import Settings
-from grit.command import Pulls
 
 BRANCH_COMMAND = 'git branch'
 
@@ -33,7 +32,7 @@ SAFE = True
 
 def branches(prefix='', *args):
     root = Git.root_container()
-    pulls = set(p[1] for p in Pulls.get_pulls() if p[0] == Settings.USER)
+    pulls = set(Git.pull_branches(Settings.USER))
 
     if Project.settings('branches')['compact']:
         fname = ['']

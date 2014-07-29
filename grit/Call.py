@@ -10,7 +10,7 @@ DIRECT_CALL = True
 
 def call_raw(command, **kwds):
     try:
-        subprocess.check_output(split_safe(command), **kwds)
+        return subprocess.check_output(split_safe(command), **kwds)
     except subprocess.CalledProcessError as e:
         raise ValueError('Couldn\'t execute "%s", errorcode=%s' %
                          (command.strip(), e.returncode))
@@ -46,7 +46,7 @@ def call_value(command, **kwds):
         return e.returncode, ''
 
 def for_each(commands, before=None, after=None, **kwds):
-    for command in filter(None, try_attr(commands, 'splitlines')):
+    for command in filter(None, split_safe(commands, 'splitlines')):
         before and before(command)
         if call(command, **kwds):
             after and after(command)

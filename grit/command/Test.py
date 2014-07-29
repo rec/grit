@@ -5,6 +5,8 @@ from grit import Git
 from grit import Project
 from grit import Settings
 
+from grit.String import banner
+
 HELP = """
 grit t[est]
     Run the test for the current project.
@@ -17,5 +19,6 @@ def run_test(cwd=None):
     Call.for_each(test.format(project=Settings.PROJECT), cwd=cwd)
 
 def test():
+    banner('Testing', Settings.PROJECT)
     run_test(Git.root())
-#
+    banner('Testing complete for', Settings.PROJECT)
