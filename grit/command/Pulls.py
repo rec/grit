@@ -21,11 +21,12 @@ SAFE = True
 _FORMATS = '#%d. %s\n    %s\n', '#%s. %-24s  %s'
 
 def _to_string(pull, short):
-    number, branch, title = pull['number'], pull['head']['label'], pull['title']
-    return _FORMATS[bool(short)] % (number, branch, title)
+    return _FORMATS[bool(short)] % pull
 
 def _raw_pulls():
-    return Git.api('repos', Settings.PROJECT_USER, Settings.PROJECT, 'pulls')
+    for p in Git.api('repos', Settings.PROJECT_USER, Settings.PROJECT, 'pulls'):
+        yield p['number'], p['head']['label'], p['title']
+
 
 def _pull_urls():
     settings = {'project': Settings.PROJECT,
