@@ -9,7 +9,8 @@ Command = namedtuple('Command', 'function help safe')
 
 def make_command(module):
     name = module.__name__.split('.')[-1].lower()
-    return name, Command(getattr(module, name),
+    return name, Command(getattr(module, name, None) or
+                         getattr(module, 'run_' + name),
                          getattr(module, 'HELP'),
                          getattr(module, 'SAFE', False))
 
