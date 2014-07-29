@@ -16,6 +16,7 @@ from grit.command import New
 from grit.command import Open
 from grit.command import Pulls
 from grit.command import Remake
+from grit.command import Remote
 from grit.command import Start
 from grit.command import Test
 
@@ -25,7 +26,8 @@ import os
 import sys
 
 _COMMANDS = CommandList(
-    Amend, Branches, Clone, Help, Find, New, Open, Pulls, Remake, Start, Test)
+    Amend, Branches, Clone, Help, Find, New, Open, Pulls, Remake, Remote, Start,
+    Test)
 
 _COMMANDS.register(**CD.COMMAND_LIST)
 
@@ -37,4 +39,3 @@ if __name__ == '__main__':
     except:
         print(traceback.format_exc(), file=sys.stderr)
         print('.')
-#

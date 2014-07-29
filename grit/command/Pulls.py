@@ -37,5 +37,5 @@ def pulls(arg=''):
     if arg and not short:
         raise ValueError("Can't understand pull argument '%s'" % arg)
 
-    for number, p in sorted(Git.pulls().items()):
+    for number, p in reversed(sorted(Git.pulls().items())):
         print(_to_string(short, number, *p))

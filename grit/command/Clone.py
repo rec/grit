@@ -2,9 +2,11 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os
 
+from grit import Call
 from grit import Git
 from grit import Settings
 from grit.command import Start
+from grit.command import Test
 
 HELP = """
 grit clone <branch> [directory]
@@ -29,6 +31,16 @@ Unknown branch %s for user %s.
 Existing branches are %s.
 """
 
+_USER_COMMANDS = """
+git fetch origin {branch}
+git checkout {branch}
+"""
+
+_OTHER_COMMANDS = """
+git fetch {user} {branch}
+git checkout -b {branch} {user}/{branch}
+"""
+
 def parse_branch(branch):
     try:
         pull = int(branch)
@@ -46,16 +58,13 @@ def parse_branch(branch):
 
 def clone(branch, directory=''):
     user, branch = parse_branch(branch)
+    cmds = _USER_COMMANDS if user == Settings.USER else _OTHER_COMMANDS
+    cmds = cmds.format(branch=branch, user=user)
     branches = Git.branches(user)
     if branch not in branches:
         raise ValueError(_ERROR_BRANCH % (branch, user, ' '.join(branches)))
 
     directory = Start.clone(directory)
-    if user == Settings.USER:
-        Call.call_raw('git fetch origin ' + branch, cwd=directory)
-        Call.call_raw('git checkout ' + branch, cwd=directory)
-    else:
-        Call.call_raw('git fetch %s %s' % (user, branch))
-        Call.call_raw('git checkout -b %s %s/%s' % (branch, user, branch))
+    Call.for_each(cmds, cwd=directory)
 
-    Test.run_test(directory)
+    # Test.run_test(directory)
