@@ -31,10 +31,9 @@ _CLONE = """
 git clone git@github.com:{user}/{project}.git --branch {branch} {directory}
 """
 
-
 def clone(directory):
     settings = Project.settings('clone')
-    branch = settings['base_branch']
+    branch = settings.get('base_branch', 'develop')
 
     root = Git.root(os.getcwd())
     if root:

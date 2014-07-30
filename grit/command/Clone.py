@@ -4,6 +4,7 @@ import os
 
 from grit import Call
 from grit import Git
+from grit import Project
 from grit import Settings
 from grit.command import Import
 from grit.command import Start
@@ -41,7 +42,9 @@ git fetch {user} {branch}
 git checkout -b {branch} {user}/{branch}
 """
 
-def clone(branch, directory=''):
+def clone(branch='', directory=''):
     directory = Start.clone(directory)
-    Import.run_import(branch, cwd=directory)
+    base_branch = Project.settings('clone').get('base_branch', 'develop')
+    if branch and branch != base_branch:
+        Import.run_import(branch, cwd=directory)
     Test.run_test(directory)
