@@ -4,9 +4,11 @@ import os.path
 import random
 
 from grit import Call
+from grit import Git
 from grit import Project
 from grit import Settings
-from grit import Git
+
+from grit.command import Remake
 
 HELP = """
 grit new filename [...filename]
@@ -52,8 +54,4 @@ def new(*files):
             f.write(output)
         Call.call('git add ' + name)
         print(name, 'written and git added.')
-
-    remake = settings.get('remake')
-    if remake:
-        Call.call(remake, cwd=root)
-        print('Project file remade.')
+        Remake.remake()
