@@ -5,6 +5,8 @@ from collections import namedtuple
 import os
 import sys
 
+from grit.Args import ARGS
+
 Command = namedtuple('Command', 'function help safe')
 
 def make_command(module):
@@ -59,7 +61,7 @@ class CommandList(object):
 
     def run_safe(self, command, *args):
         name, cmd = self._get(command)
-        if not cmd.safe:
+        if not (ARGS.yes or cmd.safe):
             confirm = raw_input('OK to execute "grit %s %s"? (y/N) ' %
                                 (name, ' '.join(args)))
             if not confirm.lower().startswith('y'):
@@ -69,5 +71,3 @@ class CommandList(object):
 
     def help(self, command):
         return self.get(command).help()
-
-#

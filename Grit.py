@@ -6,6 +6,8 @@ import os
 import sys
 import traceback
 
+from grit import Args
+
 from grit.command import Amend
 from grit.command import Branches
 from grit.command import Clone
@@ -36,7 +38,7 @@ Help.set_commands(_COMMANDS)
 
 if __name__ == '__main__':
     try:
-        _COMMANDS.run_safe(*(sys.argv[1:] or ['branches']))
+        _COMMANDS.run_safe(*Args.get_args())
     except:
         print(traceback.format_exc(), file=sys.stderr)
         print('.')
