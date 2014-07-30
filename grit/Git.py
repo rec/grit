@@ -51,11 +51,11 @@ def pulls():
     return result
 
 def pull_branches(user):
-    result = []
+    result = {}
     for number, (branch, _) in pulls().items():
         u, b = branch.split(':')
         if u == user:
-            result.append(b)
+            result[b] = number
     return result
 
 def branches(user):

@@ -33,7 +33,7 @@ SAFE = True
 
 def branches(prefix='', *args):
     root = Git.root_container()
-    pulls = set(Git.pull_branches(Settings.USER))
+    pulls = Git.pull_branches(Settings.USER)
 
     if not ARGS.expanded:
         fname = ['']
@@ -42,12 +42,15 @@ def branches(prefix='', *args):
             fname[0] = os.path.basename(f)
 
         def callback(data):
-            parts = ' '.join(filter(None, ' '.join(data.splitlines()).split()))
-            for p in pulls:
-                parts = parts.replace(' ' + p, ' !' + p)
-
-            parts = parts.replace('* ', '*')
-            print('%-12s  %s' % (fname[0] + ':', parts))
+            parts = filter(None, data.splitlines())
+            for i, p in enumerate(parts):
+                branch = p.split()[-1]
+                if branch in pulls:
+                    branch += '(%s)' % pulls[branch]
+                if p.startswith('*'):
+                    branch = '*' + branch
+                parts[i] = branch
+            print('%-12s  %s' % (fname[0] + ':', ' '.join(parts)))
 
         Call.for_each_directory(
             BRANCH_COMMAND, path=root, select=Git.select(prefix), before=before,
