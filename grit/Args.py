@@ -27,6 +27,12 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    '--reverse', '-r',
+    action='store_true',
+    help='If true, rotate and other searches are in reverse order.',
+)
+
+parser.add_argument(
     '--yes', '-y',
     action='store_true',
     help='If true, don\'t ask for confirmation.',

@@ -42,7 +42,7 @@ def branches(prefix='', *args):
             fname[0] = os.path.basename(f)
 
         def callback(data):
-            parts = ' '.join(p for p in ' '.join(data.splitlines()).split() if p)
+            parts = ' '.join(filter(None, ' '.join(data.splitlines()).split()))
             for p in pulls:
                 parts = parts.replace(' ' + p, ' !' + p)
 
