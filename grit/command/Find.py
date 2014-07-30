@@ -34,7 +34,7 @@ def _match(root, prefix):
                     break
 
 def _print_match(match, display_root):
-    print(os.path.relpath(match[1], display_root), file=sys.stderr)
+    print(os.path.relpath(os.path.join(*match), display_root), file=sys.stderr)
     print(match[0])
 
 def find(prefix, suffix=''):
