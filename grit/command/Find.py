@@ -8,6 +8,7 @@ from grit import File
 from grit import Git
 from grit import Project
 from grit import Settings
+from grit.String import startswith
 from grit.command import Test
 
 HELP = """
@@ -26,9 +27,9 @@ def _match(root, prefix):
             if d.startswith(prefix):
                 d = os.path.join(dirpath, d)
                 yield d, d
-        if not os.path.basename(dirpath).startswith(prefix):
+        if not startswith(os.path.basename(dirpath), (prefix)):
             for f in filenames:
-                if f.startswith(prefix):
+                if startswith(f, prefix):
                     yield dirpath, os.path.join(f)
                     break
 

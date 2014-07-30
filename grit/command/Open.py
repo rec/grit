@@ -7,6 +7,7 @@ import random
 from grit import Call
 from grit import Git
 from grit import Settings
+from grit.String import startswith
 
 HELP = """
 grit open [filename]
@@ -60,7 +61,7 @@ def open(filename=''):
             raise ValueError("Path %s doesn't exist." % full_path)
         if f:
             for p in os.listdir(full_path):
-                if p.startswith(f):
+                if startswith(p, f):
                     full_path = os.path.join(full_path, p)
                     break
             else:

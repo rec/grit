@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os
 
+from grit.Args import ARGS
 from grit import Call
 from grit import Git
 from grit import Project
@@ -34,7 +35,7 @@ def branches(prefix='', *args):
     root = Git.root_container()
     pulls = set(Git.pull_branches(Settings.USER))
 
-    if Project.settings('branches')['compact']:
+    if not ARGS.expanded:
         fname = ['']
 
         def before(f):

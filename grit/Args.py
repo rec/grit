@@ -15,6 +15,18 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    '--expanded', '-e',
+    action='store_true',
+    help='If true, use relaxed, multi-line displays.',
+)
+
+parser.add_argument(
+    '--push', '-p',
+    action='store_true',
+    help='If true, push after committing.',
+)
+
+parser.add_argument(
     '--yes', '-y',
     action='store_true',
     help='If true, don\'t ask for confirmation.',

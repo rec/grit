@@ -39,6 +39,7 @@ class CommandList(object):
         self.registry[name] = Command(function, help, safe)
 
     def _get(self, command):
+        command = command.lower()
         c = self.registry.get(command)
         if c:
             return command, c

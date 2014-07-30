@@ -2,6 +2,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import re
 
+from grit.Args import ARGS
+
 _DIGIT_SPLITTER = re.compile(r'^(.*?)(\d*)$')
 
 def split_version(name):
@@ -21,3 +23,8 @@ def split_safe(s, attribute='split'):
 
 def banner(*parts):
     print('\n*** %s ***\n' % ' '.join(parts))
+
+def startswith(a, b):
+    if ARGS.case_insensitive:
+        a, b = a.lower(), b.lower()
+    return a.startswith(b)

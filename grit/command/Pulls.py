@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from collections import namedtuple
 
+from grit.Args import ARGS
 from grit import Git
 from grit import Settings
 from grit.command import Open
@@ -18,10 +19,9 @@ _PULL_HREF = '/{project_user}/{project}/pull/'
 
 SAFE = True
 
-_FORMATS = '#%d. %s\n    %s\n', '#%s. %-24s  %s'
-
-def _to_string(short, number, branch, title):
-    return _FORMATS[bool(short)] % (number, branch, title)
+_FORMATS = '#%s. %-24s  %s', '#%d. %s\n    %s\n'
+def _to_string(number, branch, title):
+    return _FORMATS[ARGS.expanded] % (number, branch, title)
 
 def _pull_urls():
     settings = {'project': Settings.PROJECT,
@@ -32,10 +32,6 @@ def open_pulls():
     url, _ = _pull_urls()
     Open.open_url(url)
 
-def pulls(arg=''):
-    short = arg and 'short'.startswith(arg)
-    if arg and not short:
-        raise ValueError("Can't understand pull argument '%s'" % arg)
-
+def pulls():
     for number, p in reversed(sorted(Git.pulls().items())):
-        print(_to_string(short, number, *p))
+        print(_to_string(number, *p))

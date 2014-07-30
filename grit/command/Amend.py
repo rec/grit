@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from grit import Call
+from grit.Args import ARGS
 
 HELP = """
 grit amend
@@ -11,13 +12,7 @@ grit amend
 _AMEND = 'git commit --amend --no-edit -a'
 _PUSH_F = 'git push -f'
 
-def amend(command=''):
-    push = False
-    if command:
-        push = 'push'.startswith(command)
-        if not push:
-            raise Exception("Don't understand command", command,
-                            "Available choices are: push")
+def amend():
     Call.call(_AMEND)
-    if push:
+    if ARGS.push:
         Call.call(_PUSH_F)
