@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 from grit import Call
 from grit.Args import ARGS
+from grit import Git
 
 HELP = """
 grit amend
@@ -12,7 +13,9 @@ grit amend
 _AMEND = 'git commit --amend --no-edit -a'
 _PUSH_F = 'git push -f'
 
-SAFE = False
+def SAFE():
+    print('Current branch is %s.' % Git.branch())
+
 
 def amend():
     Call.call(_AMEND)

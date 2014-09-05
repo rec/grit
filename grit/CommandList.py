@@ -62,7 +62,12 @@ class CommandList(object):
 
     def run_safe(self, command, *args):
         name, cmd = self._get(command)
-        if not (ARGS.yes or cmd.safe):
+        if not (ARGS.yes or cmd.safe is True):
+            try:
+                cmd.safe()
+            except:
+                print('tried:', cmd.safe)
+                raise
             confirm = raw_input('OK to execute "grit %s %s"? (y/N) ' %
                                 (name, ' '.join(args)))
             if not confirm.lower().startswith('y'):

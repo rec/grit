@@ -10,7 +10,6 @@ _KEYS = 'PROJECT', 'USER', 'PROJECT_USER'
 _DICTS = (
     get_json(ROOT, '.grit'),
     get_json(HOME, '.grit', '.grit'),
-    get_json(HOME, '.grit'),
     os.environ,
 )
 
