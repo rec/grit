@@ -6,8 +6,9 @@ def is_git_dir(path):
     git = os.path.join(path, '.git')
     return os.path.isdir(git)
 
-def root(path):
+def root(path=None):
     """Returns the git root recursively containing this directory, if any."""
+    path = path or os.getcwd()
     original_path = None
     last_path = None
     while path != last_path:
