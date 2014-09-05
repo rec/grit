@@ -7,6 +7,7 @@ from os.path import exists, isabs, join, dirname
 
 from grit import String
 
+HOME = os.path.expanduser('~')
 GRIT_ROOT = dirname(dirname(__file__))
 JSON_SUFFIX = '.json'
 
@@ -16,21 +17,23 @@ def root_relative(*path):
     else:
         return join(GRIT_ROOT, *path)
 
-def raw_json(*path):
-    path = root_relative(*path)
-    try:
-        return json.load(open(path))
-    except IOError:
-        return {}
-
 def get_json(*path):
     path = root_relative(*path)
-    if not path.endswith(JSON_SUFFIX):
-        path += JSON_SUFFIX
     try:
-        return json.load(open(path))
+        data = open(path)
     except IOError:
         return {}
+    try:
+        return json.load(data)
+    except ValueError as e:
+        print(dir(e), e.args, e.message)
+        e.args = 'In file %s: %s' % (path, e.args[0]),
+        raise e
+
+def add_suffix(path, suffix=JSON_SUFFIX):
+    if path and path[-1].endswith(suffix):
+        return path
+    return path[:-1] + path[-1] + suffix
 
 def try_read(*path):
     try:

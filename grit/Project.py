@@ -8,13 +8,24 @@ from grit import Settings
 DEFAULT_ROOT = File.root_relative('projects', 'default')
 ROOT = File.root_relative('projects', Settings.PROJECT)
 
+PATH = (
+    (File.HOME, '.grit', Settings.PROJECT),
+    ('projects', Settings.PROJECT),
+    (File.HOME, '.grit', 'default'),
+    ('projects', 'default'),
+)
+
 def data(*names):
-    return (File.try_read('projects', Settings.PROJECT, *names) or
-            File.try_read('projects', 'default', *names))
+    for p in PATH:
+        r = File.try_read(*(p + names))
+        if r:
+            return r
 
 def settings(*names):
-    settings = File.get_json(DEFAULT_ROOT, *names)
-    settings.update(File.get_json(ROOT, *names))
+    names = File.add_suffix(names)
+    settings = {}
+    for p in reversed(PATH):
+        settings.update(File.get_json(*(p + names)))
 
     return settings
 
