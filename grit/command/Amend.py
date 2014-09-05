@@ -12,6 +12,8 @@ grit amend
 _AMEND = 'git commit --amend --no-edit -a'
 _PUSH_F = 'git push -f'
 
+SAFE = False
+
 def amend():
     Call.call(_AMEND)
     if ARGS.push:

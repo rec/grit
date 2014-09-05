@@ -5,9 +5,8 @@ import sys
 
 from grit import Call
 from grit import File
-from grit import Git
+from grit import GitRoot
 from grit import Project
-from grit import Settings
 from grit.String import startswith
 from grit.command import Test
 
@@ -38,7 +37,7 @@ def _print_match(match, display_root):
     print(match[0])
 
 def find(prefix, suffix=''):
-    root = Git.root()
+    root = GitRoot.ROOT
     if not root:
         raise ValueError('There is no git repository here.')
     if prefix == '-':
@@ -60,4 +59,3 @@ def find(prefix, suffix=''):
     else:
         _print_match(matches[(index + (1 if forward else -1)) % len(matches)],
                      display_root)
-#

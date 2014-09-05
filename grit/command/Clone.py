@@ -5,10 +5,11 @@ import os
 from grit import Call
 from grit import Git
 from grit import Project
-from grit import Settings
 from grit.command import Import
 from grit.command import Start
 from grit.command import Test
+
+SAFE = False
 
 HELP = """
 grit clone <branch> [directory]

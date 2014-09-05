@@ -4,7 +4,7 @@ import os.path
 import random
 
 from grit import Call
-from grit import Git
+from grit import GitRoot
 from grit import Project
 from grit import Settings
 
@@ -38,7 +38,7 @@ def new(*files):
 
     settings = Project.settings('new')
     namespace = settings.get('namespace', Settings.PROJECT),
-    root = Git.root()
+    root = GitRoot.ROOT
     include_root = os.path.join(root, settings['include_root'])
     for body, extension, template in templates:
         name = os.path.basename(body)

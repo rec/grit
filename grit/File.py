@@ -7,21 +7,28 @@ from os.path import exists, isabs, join, dirname
 
 from grit import String
 
-ROOT = dirname(dirname(__file__))
+GRIT_ROOT = dirname(dirname(__file__))
 JSON_SUFFIX = '.json'
 
 def root_relative(*path):
     if isabs(path[0]):
         return join(*path)
     else:
-        return join(ROOT, *path)
+        return join(GRIT_ROOT, *path)
+
+def raw_json(*path):
+    path = root_relative(*path)
+    try:
+        return json.load(open(path))
+    except IOError:
+        return {}
 
 def get_json(*path):
     path = root_relative(*path)
     if not path.endswith(JSON_SUFFIX):
         path += JSON_SUFFIX
     try:
-        return json.load(open(root_relative(path)))
+        return json.load(open(path))
     except IOError:
         return {}
 

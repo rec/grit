@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from grit import Call
-from grit import Git
+from grit import GitRoot
 from grit import Project
 from grit import Settings
 
@@ -9,7 +9,7 @@ from grit.String import banner
 
 HELP = """
 grit t[est]
-    Run the test for the current project.
+    Run the tests for the current project.
 """
 
 def run_test(cwd=None):
@@ -20,5 +20,5 @@ def run_test(cwd=None):
 
 def test():
     banner('Testing', Settings.PROJECT)
-    run_test(Git.root())
+    run_test(GitRoot.ROOT)
     banner('Testing complete for', Settings.PROJECT)

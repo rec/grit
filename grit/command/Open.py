@@ -6,6 +6,7 @@ import random
 
 from grit import Call
 from grit import Git
+from grit import GitRoot
 from grit import Settings
 from grit.String import startswith
 
@@ -69,7 +70,7 @@ def open(filename=''):
 
     url = _URL.format(
         branch=Git.branch(),
-        path=os.path.relpath(full_path, Git.root()),
+        path=os.path.relpath(full_path, GitRoot.ROOT),
         project=Settings.PROJECT,
         user=Settings.USER)
     open_url(url)

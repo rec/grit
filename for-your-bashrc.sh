@@ -1,5 +1,3 @@
-alias grit=/path/to/grit/Grit.py
-
 # next root
 function + () {
   cd `grit + $*`

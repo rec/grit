@@ -5,7 +5,7 @@ import random
 
 from grit import Call
 from grit import Project
-from grit import Git
+from grit import GitRoot
 
 HELP = """
 grit remake
@@ -17,5 +17,5 @@ SAFE = True
 def remake():
     remake = Project.settings('remake').get('remake')
     if remake:
-        Call.call(remake, cwd=Git.root())
+        Call.call(remake, cwd=GitRoot.ROOT)
         print('Project file remade.')

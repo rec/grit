@@ -5,6 +5,7 @@ import os
 from grit.Args import ARGS
 from grit import Call
 from grit import Git
+from grit import GitRoot
 from grit import Project
 from grit import Settings
 
@@ -32,7 +33,7 @@ grit branches [prefix]
 SAFE = True
 
 def branches(prefix='', *args):
-    root = Git.root_container()
+    root = GitRoot.root_container()
     pulls = Git.pull_branches(Settings.USER)
 
     if not ARGS.expanded:
@@ -53,13 +54,19 @@ def branches(prefix='', *args):
             print('%-12s  %s' % (fname[0] + ':', ' '.join(parts)))
 
         Call.for_each_directory(
-            BRANCH_COMMAND, path=root, select=Git.select(prefix), before=before,
+            BRANCH_COMMAND,
+            path=root,
+            select=GitRoot.select(prefix),
+            before=before,
             callback=callback)
     else:
         def before(f):
             print('\n%s:' % os.path.basename(f))
         Call.for_each_directory(
-            BRANCH_COMMAND, path=root, select=Git.select(prefix), before=before)
+            BRANCH_COMMAND,
+            path=root,
+            select=GitRoot.select(prefix),
+            before=before)
 
     if args:
         print('ERROR: arguments %s ignored' % ', '.join(args))

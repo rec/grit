@@ -5,9 +5,11 @@ import sys
 
 from grit import Call
 from grit import File
-from grit import Git
+from grit import GitRoot
 from grit import Project
 from grit.CommandList import CommandList
+
+SAFE = True
 
 MAIN_HELP = """
 grit cd [command]
@@ -40,12 +42,10 @@ grit {cd}_ [<prefix>]
 HELP = '\n'.join(
     [MAIN_HELP, ROOT_HELP, FORWARD_HELP, BACK_HELP]).format(cd='cd ')
 
-SAFE = True
-
 def _move_root(forward, prefix=''):
-    root = Git.root()
-    container = Git.root_container()
-    roots = sorted(File.each(path=container, select=Git.select(prefix)))
+    root = GitRoot.ROOT
+    container = GitRoot.root_container()
+    roots = sorted(File.each(path=container, select=GitRoot.select(prefix)))
 
     if roots:
         try:
@@ -61,7 +61,7 @@ def _move_root(forward, prefix=''):
         print('.')
 
 def root():
-    print(Git.root())
+    print(GitRoot.ROOT)
 
 def forward(prefix=''):
     _move_root(True, prefix)
