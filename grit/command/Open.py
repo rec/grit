@@ -47,8 +47,12 @@ _OPEN_COMMANDS = {
 
 _URL = 'https://github.com/{user}/{project}/tree/{branch}/{path}'
 
-def open_url(url):
-    Call.call('%s %s' % (_OPEN_COMMANDS[platform.system()], url))
+def open_url(branch, path,
+             project=Settings.PROJECT,
+             user=Settings.USER):
+    path = os.path.relpath(path, GitRoot.ROOT)
+    u = _URL.format(branch=branch, path=path, project=project, user=user)
+    Call.call('%s %s' % (_OPEN_COMMANDS[platform.system()], u))
 
 def open(filename=''):
     if not platform.system() in _OPEN_COMMANDS:
@@ -68,9 +72,4 @@ def open(filename=''):
             else:
                 raise ValueError("Can't find file matching " + filename)
 
-    url = _URL.format(
-        branch=Git.branch(),
-        path=os.path.relpath(full_path, GitRoot.ROOT),
-        project=Settings.PROJECT,
-        user=Settings.USER)
-    open_url(url)
+    open_url(branch=Git.branch(), path=full_path)
