@@ -2,7 +2,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os
 
-from grit import Call
 from grit import Git
 from grit import Project
 from grit.command import Import

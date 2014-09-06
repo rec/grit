@@ -20,6 +20,7 @@ from grit.command import Open
 from grit.command import Pulls
 from grit.command import Remake
 from grit.command import Remote
+from grit.command import Rm
 from grit.command import Rotate
 from grit.command import Settings
 from grit.command import Start
@@ -31,8 +32,8 @@ import os
 import sys
 
 _COMMANDS = CommandList(
-    Amend, Branches, Clone, Help, Import, Find, New, Open, Pulls, Remake,
-    Remote, Rotate, Settings, Start, Test)
+    Amend, Branches, Clone, Help, Import, Find, New, Open, Pulls,
+    Remake, Remote, Rm, Rotate, Settings, Start, Test)
 
 _COMMANDS.register(**CD.COMMAND_LIST)
 

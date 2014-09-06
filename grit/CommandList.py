@@ -66,8 +66,7 @@ class CommandList(object):
             try:
                 cmd.safe()
             except:
-                print('tried:', cmd.safe)
-                raise
+                pass
             confirm = raw_input('OK to execute "grit %s %s"? (y/N) ' %
                                 (name, ' '.join(args)))
             if not confirm.lower().startswith('y'):

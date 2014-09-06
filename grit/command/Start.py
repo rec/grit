@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
-from os.path import basename, dirname, isdir, join
 
 from grit import Call
 from grit import File
@@ -9,9 +8,10 @@ from grit import Git
 from grit import Project
 from grit import Settings
 from grit.String import banner
-from grit.command import Pulls
 from grit.command import Remote
 from grit.command import Test
+
+SAFE = False
 
 HELP = """
 grit start <branch> [<directory>]
@@ -43,7 +43,7 @@ def clone(directory):
        directory = directory or Settings.PROJECT
        root = os.getcwd()
 
-    directory = File.next_version(join(root, directory))
+    directory = File.next_version(os.path.join(root, directory))
     settings.update(
         branch=branch,
         directory=directory,

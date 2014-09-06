@@ -33,7 +33,7 @@ def get_json(*path):
 def add_suffix(path, suffix=JSON_SUFFIX):
     if path and path[-1].endswith(suffix):
         return path
-    return path[:-1] + path[-1] + suffix
+    return path[:-1] + (path[-1] + suffix,)
 
 def try_read(*path):
     try:
