@@ -5,6 +5,7 @@ import os
 import urllib2
 
 from grit import Call
+from grit import Project
 from grit import Settings
 
 _REMOTE = """
@@ -29,6 +30,12 @@ def _add_remote(user, nickname, cwd):
     Call.call(remote, cwd=cwd)
 
 def remote(user, nickname='', cwd=None):
-    nickname = nickname or user
-    if nickname not in _existing_remotes(cwd):
-        _add_remote(user, nickname, cwd)
+    if user == 'all':
+        assert not nickname
+        remotes = Project.settings('remotes').items()
+    else:
+        remotes = [(nickname, user or user)]
+    existing = _existing_remotes(cwd)
+    for nickname, user in remotes:
+        if nickname not in existing:
+            _add_remote(user, nickname, cwd=cwd)

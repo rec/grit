@@ -6,7 +6,12 @@ from grit.GitRoot import ROOT
 
 import os
 
-_KEYS = 'PROJECT', 'USER', 'PROJECT_USER'
+DEFAULT_PROJECT = 'rippled'
+
+# TODO: this should be a consequence of the default project.
+DEFAULT_PROJECT_USER = 'ripple'
+
+_KEYS = 'GIT_USER', 'PROJECT', 'USER', 'PROJECT_USER'
 _DICTS = (
     get_json(ROOT, '.grit'),
     get_json(HOME, '.grit', '.grit'),
@@ -16,4 +21,6 @@ _DICTS = (
 SETTINGS = compose_on_keys(_KEYS, _DICTS)
 globals().update(SETTINGS)
 
-PROJECT_USER = PROJECT_USER or USER
+USER = globals().get('GIT_USER') or USER
+PROJECT = globals().get('PROJECT', DEFAULT_PROJECT)
+PROJECT_USER = globals().get('PROJECT_USER', DEFAULT_PROJECT_USER)

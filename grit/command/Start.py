@@ -5,6 +5,7 @@ import os
 from grit import Call
 from grit import File
 from grit import Git
+from grit import GitRoot
 from grit import Project
 from grit import Settings
 from grit.String import banner
@@ -35,7 +36,7 @@ def clone(directory):
     settings = Project.settings('clone')
     branch = settings.get('base_branch', 'develop')
 
-    root = Git.root(os.getcwd())
+    root = GitRoot.root(os.getcwd())
     if root:
         directory = directory or os.path.basename(root)
         root = os.path.dirname(root)
@@ -51,8 +52,10 @@ def clone(directory):
         user=Settings.USER,
     )
     # Call git clone.
-    Call.for_each(_CLONE.format(**settings), cwd=root)
-    banner('Created', branch, ', directory', directory)
+    if Call.call(_CLONE.format(**settings).strip(), cwd=root):
+        raise ValueError('Failed to start new directory')
+
+    banner('Created', branch + ', directory', directory)
     return directory
 
 _ERROR = """
@@ -65,6 +68,7 @@ def start(branch, directory=''):
         raise ValueError(_ERROR % (branch, ' '.join(branches)))
 
     directory = clone(directory)
+    Remote.remote('all', cwd=directory)
     Remote.remote('upstream', Settings.PROJECT, directory)
     Call.call_raw('git checkout -b ' + branch, cwd=directory)
     Test.run_test(directory)

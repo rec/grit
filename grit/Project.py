@@ -28,5 +28,3 @@ def settings(*names):
         settings.update(File.get_json(*(p + names)))
 
     return settings
-
-#
