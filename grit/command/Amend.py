@@ -19,5 +19,5 @@ def SAFE():
 
 def amend():
     Call.call(_AMEND)
-    if ARGS.push:
+    if ARGS.force:
         Call.call(_PUSH_F)

@@ -1,19 +1,45 @@
 # next root
-function + () {
+function +() {
   cd `grit + $*`
 }
 
-function ++ () {
+function ++() {
+  cd `grit + $*`
+  cd `grit + $*`
+}
+
+function +++() {
+  cd `grit + $*`
+  cd `grit + $*`
+  cd `grit + $*`
+}
+
+function ++++() {
+  cd `grit + $*`
+  cd `grit + $*`
   cd `grit + $*`
   cd `grit + $*`
 }
 
 # previous root
-function - () {
+function -() {
   cd `grit - $*`
 }
 
-function -- () {
+function --() {
+  cd `grit - $*`
+  cd `grit - $*`
+}
+
+function ---() {
+  cd `grit - $*`
+  cd `grit - $*`
+  cd `grit - $*`
+}
+
+function ----() {
+  cd `grit - $*`
+  cd `grit - $*`
   cd `grit - $*`
   cd `grit - $*`
 }
@@ -38,28 +64,33 @@ function new() {
 }
 
 # amend
-function gra() {
+function ga() {
   grit a $*
 }
 
-# amend push
-function grap() {
-  grit a p
+# amend force
+function gap() {
+  grit a -f
 }
 
 # branches
-function grb() {
+function gb() {
   grit b $*
 }
 
 # clone
-function grc() {
+function gc() {
   grit c $*
 }
 
 # pushes
-function grp() {
+function gp() {
   grit p
+}
+
+# clone
+function gs() {
+  grit c $*
 }
 
 # other cd commands.

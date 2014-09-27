@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import os
 
+from grit import Args
 from grit import Call
 from grit import File
 from grit import Git
@@ -28,9 +29,9 @@ grit start <branch> [<directory>]
     directory.
 """
 
-_CLONE = """
-git clone git@github.com:{user}/{project}.git --branch {branch} {directory}
-"""
+_CLONE = ('git clone git@github.com:{user}/{project}.git ' +
+          '--branch {branch} {directory}')
+_FETCH = 'git pull upstream {branch}'
 
 def clone(directory):
     settings = Project.settings('clone')
@@ -55,6 +56,10 @@ def clone(directory):
     if Call.call(_CLONE.format(**settings).strip(), cwd=root):
         raise ValueError('Failed to start new directory')
 
+    Remote.remote('all', cwd=directory)
+    Remote.remote('upstream', Settings.PROJECT, directory)
+    if Args.ARGS.pull:
+        Call.call(_FETCH.format(**settings))
     banner('Created', branch + ', directory', directory)
     return directory
 
@@ -68,8 +73,6 @@ def start(branch, directory=''):
         raise ValueError(_ERROR % (branch, ' '.join(branches)))
 
     directory = clone(directory)
-    Remote.remote('all', cwd=directory)
-    Remote.remote('upstream', Settings.PROJECT, directory)
     Call.call_raw('git checkout -b ' + branch, cwd=directory)
     Test.run_test(directory)
     banner('Checked out new branch', branch)
