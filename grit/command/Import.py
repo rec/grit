@@ -40,7 +40,7 @@ def parse_branch(branch):
 
 def run_import(branch, **kwds):
     user, branch = parse_branch(branch)
-    if branch not in Git.branches(user):
+    if branch not in Git.branch1es(user):
         raise ValueError(_BRANCH_ERROR.format(**locals()))
     if user == Settings.USER:
         command = _LOCAL

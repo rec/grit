@@ -29,7 +29,7 @@ def _add_remote(user, nickname, cwd):
         user=user, nickname=nickname, project=Settings.PROJECT)
     Call.call(remote, cwd=cwd)
 
-def remote(user, nickname='', cwd=None):
+def remote(user='all', nickname='', cwd=None):
     if user == 'all':
         assert not nickname
         remotes = Project.settings('remotes').items()
@@ -39,3 +39,4 @@ def remote(user, nickname='', cwd=None):
     for nickname, user in remotes:
         if nickname not in existing:
             _add_remote(user, nickname, cwd=cwd)
+    return remotes

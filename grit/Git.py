@@ -70,3 +70,9 @@ def branches(user):
     for b in api('repos', user, Settings.PROJECT, 'branches'):
         result.append(b['name'])
     return result
+
+def copy_from_origin(from_branch, to_branch):
+    git('checkout', from_branch)
+    git('pull', 'origin', from_branch)
+    git('checkout', '-b', to_branch)
+    git('push', '--set-upstream', 'origin', to_branch)
