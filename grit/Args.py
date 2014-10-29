@@ -46,17 +46,8 @@ parser.add_argument(
 
 parser.add_argument(
     'command',
-    default='branches',
-    nargs='?'
-    )
-
-parser.add_argument(
-    'argument',
-    default=None,
-    nargs='?'
+    default=['branches'],
+    nargs='*'
     )
 
 ARGS = parser.parse_args()
-
-def get_args():
-    return [ARGS.command, ARGS.argument] if ARGS.argument else [ARGS.command]

@@ -6,7 +6,7 @@ import os
 import sys
 import traceback
 
-from grit import Args
+from grit.Args import ARGS
 
 from grit.command import Amend
 from grit.command import Branches
@@ -41,7 +41,7 @@ Help.set_commands(_COMMANDS)
 
 if __name__ == '__main__':
     try:
-        _COMMANDS.run_safe(*Args.get_args())
+        _COMMANDS.run_safe(*ARGS.command)
     except:
         print(traceback.format_exc(), file=sys.stderr)
         print('.')

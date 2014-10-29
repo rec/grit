@@ -54,4 +54,4 @@ def new(*files):
             f.write(output)
         Call.call('git add ' + name)
         print(name, 'written and git added.')
-        Remake.remake()
+    Remake.remake()
