@@ -1,4 +1,4 @@
-# next root
+# cd to next roots
 function +() {
   cd `grit + $*`
 }
@@ -21,7 +21,7 @@ function ++++() {
   cd `grit + $*`
 }
 
-# previous root
+# cd to previous roots
 function -() {
   cd `grit - $*`
 }
@@ -42,6 +42,41 @@ function ----() {
   cd `grit - $*`
   cd `grit - $*`
   cd `grit - $*`
+}
+
+# rotate branches
+function b () {
+  git branch
+}
+
+function b+ () {
+  grit rotate
+}
+
+function b++ () {
+  grit rotate
+  grit rotate
+}
+
+function b+++ () {
+  grit rotate
+  grit rotate
+  grit rotate
+}
+
+function b- () {
+  grit rotate -r
+}
+
+function b-- () {
+  grit rotate -r
+  grit rotate -r
+}
+
+function b--- () {
+  grit rotate -r
+  grit rotate -r
+  grit rotate -r
 }
 
 # top of root
