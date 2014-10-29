@@ -5,6 +5,7 @@ import random
 
 from grit.Args import ARGS
 from grit import Call
+from grit import Git
 
 HELP = """
 grit rotate
@@ -16,10 +17,4 @@ grit rotate
 SAFE = True
 
 def rotate():
-    branches = Call.call_raw('git branch').splitlines()
-    if len(branches) > 1:
-        for i, b in enumerate(branches):
-            if b.startswith('*'):
-                index = (i + (-1 if ARGS.reverse else 1)) % len(branches)
-                Call.call_raw('git checkout ' + branches[index])
-                return
+    Git.rotate_local_branch(ARGS.reverse)

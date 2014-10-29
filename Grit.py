@@ -12,6 +12,7 @@ from grit.command import Amend
 from grit.command import Branches
 from grit.command import Clone
 from grit.command import CD
+from grit.command import Delete
 from grit.command import Find
 from grit.command import Import
 from grit.command import Help
@@ -32,7 +33,7 @@ import os
 import sys
 
 _COMMANDS = CommandList(
-    Amend, Branches, Clone, Help, Import, Find, New, Open, Pulls,
+    Amend, Branches, Clone, Delete, Help, Import, Find, New, Open, Pulls,
     Remake, Remote, Rm, Rotate, Settings, Start, Test)
 
 _COMMANDS.register(**CD.COMMAND_LIST)

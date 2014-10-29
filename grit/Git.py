@@ -9,11 +9,36 @@ from grit import File
 from grit import GitRoot
 from grit import Settings
 
-def branch(**kwds):
-    error, results = Call.call_value('git status', **kwds)
+def git(*args, **kwds):
+    command = ' '.join(('git',) + args)
+    error, results = Call.call_value(command, **kwds)
     if error:
-        raise ValueError("Can't get git status, error = " + error)
-    return results.splitlines()[0].split()[-1]
+        raise ValueError("Can't %s, error=%s" % (command, error))
+    return results
+
+def branch(git=git):
+    return git('status').splitlines()[0].split()[-1]
+
+def remove_local_branch(branch, git=git):
+    branches = [i.strip() for i in git('branch').splitlines()]
+    if len(branches) <= 1:
+        raise ValueError("Can't delete single local branch " + branch)
+    if '* ' + branch in branches:
+        # It's the current branch - rotate branches.
+        rotate_local_branch(git=git)
+    git('branch', '-D', branch)
+
+def remove_origin_branch(branch, git=git):
+    git('push', 'origin', '--delete', branch)
+
+def rotate_local_branch(reverse=False, **kwds):
+    branches = git('branch').splitlines()
+    if len(branches) > 1:
+        for i, b in enumerate(branches):
+            if b.startswith('*'):
+                index = (i + (-1 if reverse else 1)) % len(branches)
+                git('checkout', branches[index])
+                return
 
 API = 'https://api.github.com'
 
