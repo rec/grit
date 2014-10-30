@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import json
 import os
+import subprocess
 import urllib2
 
 from grit import Call
@@ -9,11 +10,18 @@ from grit import File
 from grit import GitRoot
 from grit import Settings
 
+DEBUG = False
+
 def git(*args, **kwds):
     command = ' '.join(('git',) + args)
-    error, results = Call.call_value(command, **kwds)
+    if DEBUG:
+        print('DEBUG:', command)
+    error, results = Call.call_value(
+        command, stderr=subprocess.STDOUT, **kwds)
     if error:
         raise ValueError("Can't %s, error=%s" % (command, error))
+    if DEBUG:
+        print('RESULTS:', results)
     return results
 
 def branch(git=git):

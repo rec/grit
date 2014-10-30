@@ -20,6 +20,7 @@ from grit.command import Help
 from grit.command import New
 from grit.command import Open
 from grit.command import Pulls
+from grit.command import Release
 from grit.command import Remake
 from grit.command import Remote
 from grit.command import Rm
@@ -35,7 +36,7 @@ import sys
 
 _COMMANDS = CommandList(
     Amend, Branches, Clone, Delete, Help, Import, Find, Fresh, New, Open, Pulls,
-    Remake, Remote, Rm, Rotate, Settings, Start, Test)
+    Release, Remake, Remote, Rm, Rotate, Settings, Start, Test)
 
 _COMMANDS.register(**CD.COMMAND_LIST)
 

@@ -41,7 +41,7 @@ def call_value(command, **kwds):
     except subprocess.CalledProcessError as e:
         print('ERROR:'
               ' command =', command.strip(),
-              ' code =', returncode)
+              ' code =', e.returncode)
         e.output and print(e.output)
         return e.returncode, ''
 
