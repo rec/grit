@@ -21,7 +21,6 @@ grit cd [command]
 
 ROOT_HELP = """
 grit {cd}^
-grit {cd}6
     Print the top-level directory in this git project.
 """
 
@@ -71,11 +70,8 @@ def back(prefix=''):
 
 COMMAND_LIST = {
     '^': (root, ROOT_HELP.format(cd=''), True),
-    '6': (root, ROOT_HELP.format(cd=''), True),
     '+': (forward, FORWARD_HELP.format(cd=''), True),
-    '=': (forward, FORWARD_HELP.format(cd=''), True),
     '-': (back, BACK_HELP.format(cd=''), True),
-    '_': (back, BACK_HELP.format(cd=''), True),
     }
 
 _COMMANDS = CommandList(**COMMAND_LIST)
