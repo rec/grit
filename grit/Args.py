@@ -21,12 +21,6 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    '--pull', '-p',
-    action='store_true',
-    help='If true, pull base branch from remote before start or clone.',
-)
-
-parser.add_argument(
     '--force', '-f',
     action='store_true',
     help='If true, force-push after amending.',

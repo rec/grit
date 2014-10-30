@@ -29,9 +29,8 @@ grit start <branch> [<directory>]
     directory.
 """
 
-_CLONE = ('git clone git@github.com:{user}/{project}.git ' +
+_CLONE = ('clone git@github.com:{user}/{project}.git ' +
           '--branch {branch} {directory}')
-_FETCH = 'git pull upstream {branch}'
 
 def clone(directory):
     settings = Project.settings('clone')
@@ -53,13 +52,12 @@ def clone(directory):
         user=Settings.USER,
     )
     # Call git clone.
-    if Call.call(_CLONE.format(**settings).strip(), cwd=root):
+    if Git.git(_CLONE.format(**settings), cwd=root):
         raise ValueError('Failed to start new directory')
 
     Remote.remote('all', cwd=directory)
     Remote.remote('upstream', Settings.PROJECT, directory)
-    if Args.ARGS.pull:
-        Call.call(_FETCH.format(**settings))
+    Git.git('pull', 'upstream', branch)
     banner('Created', branch + ', directory', directory)
     return directory
 
