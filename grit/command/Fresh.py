@@ -7,7 +7,7 @@ import urllib2
 from grit import Git
 from grit import Project
 
-SAFE = False
+SAFE = True
 
 HELP = """
 grit fresh branch [base_branch ...]

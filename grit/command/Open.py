@@ -26,6 +26,7 @@ open
 open root [upstream] [alias]
 open Filename
 open commit
+open diff
 open pull
 
 """
@@ -40,6 +41,8 @@ _OPEN_COMMANDS = {
 _URL = 'https://github.com/{user}/{project}/tree/{branch}/{path}'
 _COMMIT = 'https://github.com/{user}/{project}/commits/{branch}'
 _PULL = 'https://github.com/{project_user}/{project}/pull/{number}'
+_NEW_PULL = 'https://github.com/{user}/{project}/compare/{branch}?expand=1'
+_DIFF = 'https://github.com/{user}/{project}/compare/{branch}'
 
 def open_url(command):
     Call.call('%s %s' % (_OPEN_COMMANDS[platform.system()], command))
@@ -55,9 +58,9 @@ def open(name='', user=''):
     if not platform.system() in _OPEN_COMMANDS:
         raise ValueError("Can't open a URL for platform.system() = " + plat)
 
-    if len(user) > 1 and 'upstream'.startswith(user):
+    if user and 'upstream'.startswith(user):
         user = Settings.PROJECT_USER
-    elif len(name) > 1 and 'upstream'.startswith(name):
+    elif name > 1 and 'upstream'.startswith(name):
         user = Settings.PROJECT_USER
         name = ''
     elif user:
@@ -75,10 +78,18 @@ def open(name='', user=''):
             project=Settings.PROJECT))
         return
 
+    if name and 'diffs'.startswith(name):
+        open_url(_DIFF.format(
+            branch=Git.branch(),
+            user=user,
+            project=Settings.PROJECT))
+        return
+
     if name and 'pulls'.startswith(name):
         if user == Settings.PROJECT_USER:
             url, _ = Pulls.pull_urls()
             open_url(url)
+            return
         elif user == Settings.USER:
             branch_name = '%s:%s' % (user, Git.branch())
             for number, (bname, _) in Git.pulls().items():
@@ -89,10 +100,12 @@ def open(name='', user=''):
                         number=number))
                     return
             else:
-                raise ValueErrror('No pull for branch %s.' % branch_nanme)
+                open_url(_NEW_PULL.format(
+                    user=user,
+                    project=Settings.PROJECT,
+                    branch=Git.branch()))
         else:
-            raise ValueErrror("Can't pull for user %s." % user)
-
+            raise ValueError("Can't pull for user %s." % user)
 
     if 'root'.startswith(name):
         name = GitRoot.root()
