@@ -64,6 +64,10 @@ def get_format_string(name, user, context):
     if 'diffs'.startswith(name):
         return _DIFF
 
+    if name.isdigit():
+        context['number'] = int(name)
+        return _PULL
+
     if 'pulls'.startswith(name):
         if user == Settings.PROJECT_USER:
             return Pulls.pull_urls()[0]
