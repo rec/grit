@@ -5,7 +5,6 @@ from collections import namedtuple
 from grit.Args import ARGS
 from grit import Git
 from grit import Settings
-from grit.command import Open
 
 HELP = """
 git p[ulls] [s[hort]]
@@ -23,15 +22,12 @@ _FORMATS = '#%s. %-24s  %s', '#%d. %s\n    %s\n'
 def _to_string(number, branch, title):
     return _FORMATS[ARGS.expanded] % (number, branch, title)
 
-def _pull_urls():
+def pull_urls():
     settings = {'project': Settings.PROJECT,
                 'project_user': Settings.PROJECT_USER}
     return _PULL_URL.format(**settings), _PULL_HREF.format(**settings)
 
-def open_pulls():
-    url, _ = _pull_urls()
-    Open.open_url(url)
-
 def pulls():
+    print(Git.pulls())
     for number, p in reversed(sorted(Git.pulls().items())):
         print(_to_string(number, *p))

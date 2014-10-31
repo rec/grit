@@ -27,23 +27,29 @@ def _get_tag(line):
         return m.group(1)
 
 def release(*requests):
-    settings = Project.settings('git')
-    base_branch = settings['base_branch']
-    next_branch = settings['next_branch']
+    requests = list(requests)
+    settings = Project.settings('git')  # TODO: This is empty and shouldn't be.
+    base_branch = settings.get('base_branch', 'develop')
+    next_branch = settings.get('next_branch', 'develop-next')
     pulls = Git.pulls()
     remotes = Remote.remote()
     inverse = dict((v, k) for (k, v) in remotes)
 
     if 'continue' in requests:
-        requests = list(requests)
         requests.remove('continue')
     else:
         Delete.delete(next_branch)
         Git.copy_from_origin(base_branch, next_branch)
 
-    for request in requests:
+    for i, request in enumerate(requests):
         if request.isdigit():
-            request = pulls[int(request)][0]
+            req = pulls.get(int(request))
+            if req:
+                requests[i] = req[0]
+            else:
+                raise ValueError('No such pull request #' + request)
+
+    for request in requests:
         user, branch = request.split(':')
         nickname = inverse[user]
         if user == Settings.USER:

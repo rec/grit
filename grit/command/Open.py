@@ -9,6 +9,8 @@ from grit import Git
 from grit import GitRoot
 from grit import Settings
 from grit.String import startswith
+from grit.command import Pulls
+from grit.command import Remote
 
 HELP = """
 grit open [filename]
@@ -20,21 +22,11 @@ grit open [filename]
 
 """
 
-What should we be able to open?
-
-* The current directory.
-* A file.
-* A found file.
-
-in
-
-* our repo
-* the upstream repo
-* some other repo.
-
-And:
-* A pull request.
-* the pull request for this branch, if any.
+open
+open root [upstream] [alias]
+open Filename
+open commit
+open pull
 
 """
 
@@ -46,21 +38,68 @@ _OPEN_COMMANDS = {
 }
 
 _URL = 'https://github.com/{user}/{project}/tree/{branch}/{path}'
+_COMMIT = 'https://github.com/{user}/{project}/commits/{branch}'
+_PULL = 'https://github.com/{project_user}/{project}/pull/{number}'
 
-def open_url(branch, path,
+def open_url(command):
+    Call.call('%s %s' % (_OPEN_COMMANDS[platform.system()], command))
+
+def open_path(branch, path,
              project=Settings.PROJECT,
              user=Settings.USER):
     path = os.path.relpath(path, GitRoot.ROOT)
-    u = _URL.format(branch=branch, path=path, project=project, user=user)
-    Call.call('%s %s' % (_OPEN_COMMANDS[platform.system()], u))
+    url = _URL.format(branch=branch, path=path, project=project, user=user)
+    open_url(url)
 
-def open(filename=''):
+def open(name='', user=''):
     if not platform.system() in _OPEN_COMMANDS:
         raise ValueError("Can't open a URL for platform.system() = " + plat)
-    branch = Git.branch()
+
+    if len(user) > 1 and 'upstream'.startswith(user):
+        user = Settings.PROJECT_USER
+    elif len(name) > 1 and 'upstream'.startswith(name):
+        user = Settings.PROJECT_USER
+        name = ''
+    elif user:
+        for nickname, account in Remote.remote():
+            if nickname == account:
+                user = account
+                break
+    else:
+        user = Settings.USER
+
+    if name and 'commits'.startswith(name):
+        open_url(_COMMIT.format(
+            branch=Git.branch(),
+            user=user,
+            project=Settings.PROJECT))
+        return
+
+    if name and 'pulls'.startswith(name):
+        if user == Settings.PROJECT_USER:
+            url, _ = Pulls.pull_urls()
+            open_url(url)
+        elif user == Settings.USER:
+            branch_name = '%s:%s' % (user, Git.branch())
+            for number, (bname, _) in Git.pulls().items():
+                if bname == branch_name:
+                    open_url(_PULL.format(
+                        project_user=Settings.PROJECT_USER,
+                        project=Settings.PROJECT,
+                        number=number))
+                    return
+            else:
+                raise ValueErrror('No pull for branch %s.' % branch_nanme)
+        else:
+            raise ValueErrror("Can't pull for user %s." % user)
+
+
+    if 'root'.startswith(name):
+        name = GitRoot.root()
+
     full_path = os.getcwd()
-    if filename:
-        path, f = os.path.split(filename)
+    if name:
+        path, f = os.path.split(name)
         full_path = os.path.join(full_path, path)
         if not os.path.exists(full_path):
             raise ValueError("Path %s doesn't exist." % full_path)
@@ -70,6 +109,7 @@ def open(filename=''):
                     full_path = os.path.join(full_path, p)
                     break
             else:
-                raise ValueError("Can't find file matching " + filename)
+                raise ValueError("Can't find file matching " + name)
 
-    open_url(branch=Git.branch(), path=full_path)
+    branch = Git.branch() if user == Settings.USER else 'develop'
+    open_path(branch=branch, user=user, path=full_path)

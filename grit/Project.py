@@ -1,18 +1,17 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os.path
+import os
 
 from grit import File
 from grit import Settings
 
-DEFAULT_ROOT = File.root_relative('projects', 'default')
-ROOT = File.root_relative('projects', Settings.PROJECT)
+ROOT = File.root_relative('projects')
 
 PATH = (
     (File.HOME, '.grit', Settings.PROJECT),
-    ('projects', Settings.PROJECT),
+    (ROOT, Settings.PROJECT),
     (File.HOME, '.grit', 'default'),
-    ('projects', 'default'),
+    (ROOT, 'default'),
 )
 
 def data(*names):
@@ -28,3 +27,9 @@ def settings(*names):
         settings.update(File.get_json(*(p + names)))
 
     return settings
+
+def files(*names):
+    result = set()
+    for p in PATH:
+        result += os.listdir(os.path.join(*(p + names)))
+    return result
