@@ -44,68 +44,40 @@ _PULL = 'https://github.com/{project_user}/{project}/pull/{number}'
 _NEW_PULL = 'https://github.com/{user}/{project}/compare/{branch}?expand=1'
 _DIFF = 'https://github.com/{user}/{project}/compare/{branch}'
 
-def open_url(command):
-    Call.call('%s %s' % (_OPEN_COMMANDS[platform.system()], command))
+def open_url(url):
+    Call.call('%s %s' % (_OPEN_COMMANDS[platform.system()], url))
 
 def open_path(branch, path,
              project=Settings.PROJECT,
              user=Settings.USER):
-    path = os.path.relpath(path, GitRoot.ROOT)
     url = _URL.format(branch=branch, path=path, project=project, user=user)
     open_url(url)
 
-def open(name='', user=''):
-    if not platform.system() in _OPEN_COMMANDS:
-        raise ValueError("Can't open a URL for platform.system() = " + plat)
 
-    if user and 'upstream'.startswith(user):
-        user = Settings.PROJECT_USER
-    elif name > 1 and 'upstream'.startswith(name):
-        user = Settings.PROJECT_USER
-        name = ''
-    elif user:
-        for nickname, account in Remote.remote():
-            if nickname == account:
-                user = account
-                break
-    else:
-        user = Settings.USER
-
-    if name and 'commits'.startswith(name):
-        open_url(_COMMIT.format(
-            branch=Git.branch(),
-            user=user,
-            project=Settings.PROJECT))
+def get_format_string(name, user, context):
+    if not name:
         return
 
-    if name and 'diffs'.startswith(name):
-        open_url(_DIFF.format(
-            branch=Git.branch(),
-            user=user,
-            project=Settings.PROJECT))
-        return
+    if 'commits'.startswith(name):
+        return _COMMIT
 
-    if name and 'pulls'.startswith(name):
+    if 'diffs'.startswith(name):
+        return _DIFF
+
+    if 'pulls'.startswith(name):
         if user == Settings.PROJECT_USER:
-            url, _ = Pulls.pull_urls()
-            open_url(url)
-            return
-        elif user == Settings.USER:
+            return Pulls.pull_urls()[0]
+
+        if user == Settings.USER:
             branch_name = '%s:%s' % (user, Git.branch())
             for number, (bname, _) in Git.pulls().items():
                 if bname == branch_name:
-                    open_url(_PULL.format(
-                        project_user=Settings.PROJECT_USER,
-                        project=Settings.PROJECT,
-                        number=number))
-                    return
+                    context['number'] = number
+                    return _PULL
             else:
-                open_url(_NEW_PULL.format(
-                    user=user,
-                    project=Settings.PROJECT,
-                    branch=Git.branch()))
-        else:
-            raise ValueError("Can't pull for user %s." % user)
+                return _NEW_PULL
+
+        raise ValueError("Can't pull for user %s." % user)
 
     if 'root'.startswith(name):
         name = GitRoot.root()
@@ -124,5 +96,34 @@ def open(name='', user=''):
             else:
                 raise ValueError("Can't find file matching " + name)
 
-    branch = Git.branch() if user == Settings.USER else 'develop'
-    open_path(branch=branch, user=user, path=full_path)
+    if user != Settings.USER:
+        context['branch'] = 'develop'
+    context['path'] = os.path.relpath(full_path, GitRoot.ROOT)
+    return _URL
+
+def open(name='', user=''):
+    if not platform.system() in _OPEN_COMMANDS:
+        raise ValueError("Can't open a URL for platform.system() = " + plat)
+
+    if user and 'upstream'.startswith(user):
+        user = Settings.PROJECT_USER
+    elif name > 1 and 'upstream'.startswith(name):
+        user = Settings.PROJECT_USER
+        name = ''
+    elif user:
+        for nickname, account in Remote.remote():
+            if nickname == account:
+                user = account
+                break
+    else:
+        user = Settings.USER
+
+    context = {
+        'branch': Git.branch(),
+        'user': user,
+        'project_user': Settings.PROJECT_USER,
+        'project': Settings.PROJECT,
+    }
+
+    fmt = get_format_string(name, user, context)
+    open_url(fmt.format(**context))
