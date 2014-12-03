@@ -11,7 +11,6 @@ from grit import Project
 from grit import Settings
 from grit.String import banner
 from grit.command import Remote
-from grit.command import Test
 
 SAFE = False
 
@@ -20,10 +19,8 @@ grit start <branch> [<directory>]
     Starts a fresh branch of the current project.
 
     Goes to the directory above the git directory containing the current path,
-    clones a copy of the current project under the name directory, checks out
-    the branch name given, then runs some tests.
-
-    The list of tests is found in the settings directory for your project.
+    clones a copy of the current project under the name directory and checks out
+    the branch name given.
 
     If the directory name is not given, it adds a numeric suffix to the current
     directory.
@@ -72,5 +69,4 @@ def start(branch, directory=''):
 
     directory = clone(directory)
     Call.call_raw('git checkout -b ' + branch, cwd=directory)
-    Test.run_test(directory)
     banner('Checked out new branch', branch)

@@ -33,6 +33,13 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    '--verbose', '-v',
+    action='store_true',
+    help=('Report more information about which commands are executed and the '
+          'results.'),
+)
+
+parser.add_argument(
     '--yes', '-y',
     action='store_true',
     help='If true, don\'t ask for confirmation.',

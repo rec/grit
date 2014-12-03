@@ -5,6 +5,7 @@ import os
 import subprocess
 import urllib2
 
+from grit.Args import ARGS
 from grit import Call
 from grit import File
 from grit import GitRoot
@@ -14,14 +15,14 @@ DEBUG = False
 
 def git(*args, **kwds):
     command = ' '.join(('git',) + args)
-    if DEBUG:
-        print('DEBUG:', command)
+    if ARGS.verbose:
+        print('$', command)
     error, results = Call.call_value(
         command, stderr=subprocess.STDOUT, **kwds)
     if error:
         raise ValueError("Can't %s, error=%s" % (command, error))
-    if DEBUG:
-        print('RESULTS:', results)
+    if ARGS.verbose:
+        print(results)
     return results
 
 def branch(git=git):
@@ -45,8 +46,9 @@ def rotate_local_branch(reverse=False, **kwds):
         for i, b in enumerate(branches):
             if b.startswith('*'):
                 index = (i + (-1 if reverse else 1)) % len(branches)
-                git('checkout', branches[index])
-                return
+                branch = branches[index].strip()
+                git('checkout', branch)
+                return branch
 
 API = 'https://api.github.com'
 
@@ -79,8 +81,14 @@ def branches(user):
         result.append(b['name'])
     return result
 
-def copy_from_origin(from_branch, to_branch):
+def copy_from_remote(from_branch, to_branch, remote='upstream'):
     git('checkout', from_branch)
-    git('pull', 'origin', from_branch)
-    git('checkout', '-b', to_branch)
-    git('push', '--set-upstream', 'origin', to_branch)
+    git('pull', remote, from_branch)
+    git('checkout -b', to_branch)
+    git('push --set-upstream origin', to_branch)
+
+def rebase_abort():
+    try:
+        git('rebase --abort')
+    except:
+        pass

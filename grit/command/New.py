@@ -23,33 +23,33 @@ def _guard(*paths):
 def _existing_templates():
     suffix = '.template'
     templates = sorted(Project.files('new'), key=len, reverse=True)
-    print('???', templates)
     return [t[:-len(suffix)] for t in templates if t.endswith(suffix)]
 
 def new(*files):
     if not files:
         raise Exception('No files specified for "new" command.')
     existing_templates = _existing_templates()
-    print('!!!!!!!!', existing_templates)
 
     templates = []
     for f in files:
         if os.path.exists(f):
             raise Exception(f + ' already exists!')
         for t in existing_templates:
-            print('!!!!', f, t)
             if f.endswith(t):
                 template = Project.data('new', '%s.template' % t)
                 break
         else:
             raise ValueError('No template for ' + f)
-        templates.append([body, extension, template])
+        templates.append([f, template])
 
     settings = Project.settings('new')
     namespace = settings.get('namespace', Settings.PROJECT),
     root = GitRoot.ROOT
     include_root = os.path.join(root, settings['include_root'])
-    for body, extension, template in templates:
+    for f, template in templates:
+        body, extension = os.path.splitext(f)
+        if extension.startswith('.'):
+            extension = extension[1:]
         name = os.path.basename(body)
         fname = os.path.dirname(os.path.abspath(name))
         path_to_file = os.path.relpath(fname, include_root)

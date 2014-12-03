@@ -55,20 +55,17 @@ def open_path(branch, path,
 
 
 def get_format_string(name, user, context):
-    if not name:
-        return
-
-    if 'commits'.startswith(name):
+    if name and 'commits'.startswith(name):
         return _COMMIT
 
-    if 'diffs'.startswith(name):
+    if name and 'diffs'.startswith(name):
         return _DIFF
 
     if name.isdigit():
         context['number'] = int(name)
         return _PULL
 
-    if 'pulls'.startswith(name):
+    if name and 'pulls'.startswith(name):
         if user == Settings.PROJECT_USER:
             return Pulls.pull_urls()[0]
 
@@ -83,7 +80,7 @@ def get_format_string(name, user, context):
 
         raise ValueError("Can't pull for user %s." % user)
 
-    if 'root'.startswith(name):
+    if name and 'root'.startswith(name):
         name = GitRoot.root()
 
     full_path = os.getcwd()
@@ -111,7 +108,7 @@ def open(name='', user=''):
 
     if user and 'upstream'.startswith(user):
         user = Settings.PROJECT_USER
-    elif name > 1 and 'upstream'.startswith(name):
+    elif name and 'upstream'.startswith(name):
         user = Settings.PROJECT_USER
         name = ''
     elif user:

@@ -34,12 +34,13 @@ def release(*requests):
     pulls = Git.pulls()
     remotes = Remote.remote()
     inverse = dict((v, k) for (k, v) in remotes)
+    Git.rebase_abort()
 
     if 'continue' in requests:
         requests.remove('continue')
     else:
         Delete.delete(next_branch)
-        Git.copy_from_origin(base_branch, next_branch)
+        Git.copy_from_remote(base_branch, next_branch)
 
     for i, request in enumerate(requests):
         if request.isdigit():

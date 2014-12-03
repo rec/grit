@@ -31,5 +31,9 @@ def settings(*names):
 def files(*names):
     result = set()
     for p in PATH:
-        result += os.listdir(os.path.join(*(p + names)))
+        full_path = os.path.join(*(p + names))
+        try:
+            result.update(os.listdir(full_path))
+        except:
+            pass
     return result

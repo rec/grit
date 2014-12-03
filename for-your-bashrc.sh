@@ -54,29 +54,23 @@ function b+ () {
 }
 
 function b++ () {
-  grit rotate
-  grit rotate
+  grit rotate 2
 }
 
 function b+++ () {
-  grit rotate
-  grit rotate
-  grit rotate
+  grit rotate 3
 }
 
 function b- () {
-  grit rotate -r
+  grit rotate -1
 }
 
 function b-- () {
-  grit rotate -r
-  grit rotate -r
+  grit rotate -2
 }
 
 function b--- () {
-  grit rotate -r
-  grit rotate -r
-  grit rotate -r
+  grit rotate -3
 }
 
 # top of root
@@ -86,12 +80,17 @@ function root () {
 
 # find
 function f() {
-  cd `grit f $*`
+  cd `grit find $*`
+}
+
+# find
+function e() {
+  $EDITOR `grit find $*`
 }
 
 # open
 function o() {
-  grit o $*
+  grit open $*
 }
 
 function new() {
@@ -105,7 +104,7 @@ function ga() {
 
 # amend force
 function gap() {
-  grit a -f
+  grit a -f $*
 }
 
 # branches

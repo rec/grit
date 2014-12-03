@@ -16,5 +16,14 @@ grit rotate
 
 SAFE = True
 
-def rotate():
-    Git.rotate_local_branch(ARGS.reverse)
+def rotate(count='1'):
+    count = int(count)
+    if not count:
+        raise ValueError('Rotate by 0!')
+    if count < 0:
+        count = -count
+        ARGS.reverse = not ARGS.reverse
+    for c in range(count):
+        branch = Git.rotate_local_branch(ARGS.reverse)
+
+    print('Branch is now %s.' % branch)

@@ -17,7 +17,7 @@ def root(path=None):
         last_path = path
         path = os.path.dirname(path)
 
-ROOT = root(os.getcwd())
+ROOT = root()
 
 def root_container(path=None):
     new_path = root(path)
