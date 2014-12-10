@@ -67,7 +67,8 @@ def pulls():
         result[p['number']] = p['head']['label'], p['title']
     return result
 
-def pull_branches(user):
+def pull_branches(user=None):
+    user = user or Settings.USER
     result = {}
     for number, (branch, _) in pulls().items():
         u, b = branch.split(':')
