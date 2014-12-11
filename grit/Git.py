@@ -67,8 +67,7 @@ def pulls():
         result[p['number']] = p['head']['label'], p['title']
     return result
 
-def pull_branches(user=None):
-    user = user or Settings.USER
+def pull_branches(user=Settings.USER):
     result = {}
     for number, (branch, _) in pulls().items():
         u, b = branch.split(':')
@@ -76,7 +75,7 @@ def pull_branches(user=None):
             result[b] = number
     return result
 
-def branches(user):
+def branches(user=Settings.USER):
     result = []
     for b in api('repos', user, Settings.PROJECT, 'branches'):
         result.append(b['name'])
