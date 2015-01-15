@@ -22,26 +22,6 @@ grit clone <branch> [directory]
     directory.
 """
 
-_ERROR = """
-Unknown pull #%s.
-Active pulls are %s.
-"""
-
-_ERROR_BRANCH = """
-Unknown branch %s for user %s.
-Existing branches are %s.
-"""
-
-_USER_COMMANDS = """
-git fetch origin {branch}
-git checkout {branch}
-"""
-
-_OTHER_COMMANDS = """
-git fetch {user} {branch}
-git checkout -b {branch} {user}/{branch}
-"""
-
 def clone(branch='', directory=''):
     directory = Start.clone(directory)
     base_branch = Project.settings('clone').get('base_branch', 'develop')

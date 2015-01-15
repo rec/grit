@@ -19,10 +19,6 @@ git checkout -b {branch} {user}/{branch}"""
 
 SAFE = True
 
-_LOCAL = 'git checkout {branch}'
-
-_BRANCH_ERROR = 'User "{user}" has no branch "{branch}"'
-
 def parse_branch(branch):
     try:
         pull = int(branch)
@@ -43,8 +39,8 @@ def run_import(branch, **kwds):
     if branch not in Git.branch1es(user):
         raise ValueError(_BRANCH_ERROR.format(**locals()))
     if user == Settings.USER:
-        command = _LOCAL
+        Git.git('checkout', branch)
     else:
         Remote.remote(user, **kwds)
-        command = _REMOTE
-    Call.for_each(command.format(**locals()), **kwds)
+        Git.git('fetch', user, branch)
+        Git.git('checkout', '-b', '/'.join([user, branch]))

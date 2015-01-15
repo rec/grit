@@ -14,9 +14,9 @@ from grit import Settings
 DEBUG = False
 
 def git(*args, **kwds):
-    command = ' '.join(('git',) + args)
+    command = ('git',) + args
     if ARGS.verbose:
-        print('$', command)
+        print('$', ' '.join(command))
     error, results = Call.call_value(
         command, stderr=subprocess.STDOUT, **kwds)
     if error:
@@ -52,14 +52,21 @@ def rotate_local_branch(reverse=False, **kwds):
 
 API = 'https://api.github.com'
 
-def api(*parts):
+def api(*parts, **kwds):
     url = '/'.join((API, ) + parts)
+    ### if kwds:
+
     try:
+        if ARGS.verbose:
+            print('Opening URL', url)
         stream = urllib2.urlopen(url)
     except urllib2.HTTPError as e:
         e.msg = '%s: %s' % (e.msg, url)
         raise
     return json.load(stream)
+
+#def paged_api(*parts):
+
 
 def pulls():
     result = {}
@@ -84,8 +91,8 @@ def branches(user=Settings.USER):
 def copy_from_remote(from_branch, to_branch, remote='upstream'):
     git('checkout', from_branch)
     git('pull', remote, from_branch)
-    git('checkout -b', to_branch)
-    git('push --set-upstream origin', to_branch)
+    git('checkout', '-b', to_branch)
+    git('push', '--set-upstream', 'origin', to_branch)
 
 def rebase_abort():
     try:

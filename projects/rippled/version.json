@@ -1,0 +1,5 @@
+{
+   "files": [
+       "Builds/rpm/rippled.spec",
+       "src/ripple/protocol/impl/BuildInfo.cpp"]
+}

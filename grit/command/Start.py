@@ -49,7 +49,7 @@ def clone(directory):
         user=Settings.USER,
     )
     # Call git clone.
-    if Git.git(_CLONE.format(**settings), cwd=root):
+    if Git.git(*_CLONE.format(**settings).split(), cwd=root):
         raise ValueError('Failed to start new directory')
 
     Remote.remote('all', cwd=directory)

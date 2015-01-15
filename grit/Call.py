@@ -9,11 +9,12 @@ from grit.String import split_safe
 DIRECT_CALL = True
 
 def call_raw(command, **kwds):
+    cmd = split_safe(command)
     try:
-        return subprocess.check_output(split_safe(command), **kwds)
+        return subprocess.check_output(cmd, **kwds)
     except subprocess.CalledProcessError as e:
         raise ValueError('Couldn\'t execute "%s", errorcode=%s' %
-                         (command.strip(), e.returncode))
+                         ' '.join(cmd), e.returncode)
 
 def call(command, callback=None, **kwds):
     cmd = split_safe(command)
@@ -29,18 +30,19 @@ def call(command, callback=None, **kwds):
         returncode = subprocess.call(cmd, **kwds)
     if returncode:
         print('ERROR:'
-              ' command =', command.strip(),
+              ' command =', ' '.join(cmd),
               ' code =', returncode)
         error and print(error)
     return returncode
 
 def call_value(command, **kwds):
     cmd = split_safe(command)
+    print('???', cmd)
     try:
         return 0, subprocess.check_output(cmd, **kwds)
     except subprocess.CalledProcessError as e:
         print('ERROR:'
-              ' command =', command.strip(),
+              ' command =', ' '.join(cmd),
               ' code =', e.returncode)
         e.output and print(e.output)
         return e.returncode, ''

@@ -2,6 +2,10 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import json
 import os
+import re
+import shutil
+
+from tempfile import NamedTemporaryFile
 
 from os.path import exists, isabs, join, dirname
 
@@ -62,3 +66,25 @@ def next_version(name):
         if not exists(name):
             return name
         version += 1
+
+def subn(name, pattern, repl, count=None):
+    with NamedTemporaryFile(dir=os.path.dirname(name), delete=False) as t:
+        tmp_name = t.name
+        with open(name) as f:
+            for line in f.readlines():
+                if count is None:
+                    line = re.sub(pattern, repl, line)
+                elif count > 0:
+                    line, subs = re.subn(pattern, repl, line, count=count)
+                    count -= subs
+                t.write(line)
+
+    os.remove(name)
+    shutil.move(tmp_name, name)
+
+def search(name, pattern):
+    with open(name) as f:
+        for line in f.readlines():
+            match = re.search(pattern, line)
+            if match:
+                return match.group()
