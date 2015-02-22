@@ -4,6 +4,7 @@ import os.path
 import random
 
 from grit import Call
+from grit import CppGuards
 from grit import GitRoot
 from grit import Project
 from grit import Settings
@@ -17,8 +18,11 @@ grit new filename [...filename]
 
 SAFE = True
 
-def _guard(*paths):
-    return os.path.join(*paths).upper().replace('/', '_')
+def _get_guard(f):
+    try:
+        return CppGuards.get_guard(f)
+    except:
+        return ''
 
 def _existing_templates():
     suffix = '.template'
@@ -54,7 +58,7 @@ def new(*files):
         fname = os.path.dirname(os.path.abspath(name))
         path_to_file = os.path.relpath(fname, include_root)
         output = template.format(
-            guard=_guard(Settings.PROJECT, path_to_file, body, extension),
+            guard=_get_guard(f),
             path_to_file=path_to_file,
             name=name,
             namespace=namespace)

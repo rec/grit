@@ -37,7 +37,6 @@ def call(command, callback=None, **kwds):
 
 def call_value(command, **kwds):
     cmd = split_safe(command)
-    print('???', cmd)
     try:
         return 0, subprocess.check_output(cmd, **kwds)
     except subprocess.CalledProcessError as e:

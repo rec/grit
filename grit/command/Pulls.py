@@ -28,6 +28,5 @@ def pull_urls():
     return _PULL_URL.format(**settings), _PULL_HREF.format(**settings)
 
 def pulls():
-    print(Git.pulls())
     for number, p in reversed(sorted(Git.pulls().items())):
         print(_to_string(number, *p))

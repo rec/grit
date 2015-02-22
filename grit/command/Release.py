@@ -43,15 +43,21 @@ def release(*requests):
         Git.copy_from_remote(base_branch, next_branch)
 
     for i, request in enumerate(requests):
+        pull = ''
         if request.isdigit():
-            req = pulls.get(int(request))
+            pull = int(request)
+            req = pulls.get(pull)
             if req:
-                requests[i] = req[0]
+                request = req[0]
             else:
                 raise ValueError('No such pull request #' + request)
+        user, branch = Git.split_branch(request)
+        requests[i] = user, branch, pull
 
     for request in requests:
-        user, branch = request.split(':')
+        user, branch, pull = request
+        print('------------------------------------------------' )
+        print('%s:%s %s' % (user, branch, pull))
         nickname = inverse[user]
         if user == Settings.USER:
             nickname = 'origin'

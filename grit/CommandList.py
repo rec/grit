@@ -16,6 +16,14 @@ def make_command(module):
                          getattr(module, 'HELP'),
                          getattr(module, 'SAFE', False))
 
+def confirm(command):
+    if ARGS.yes:
+        return True
+    result = raw_input('OK to %s? (y/N) ' % command)
+    if result.lower().startswith('y'):
+        return True
+    print('Cancelled.', file=sys.stderr)
+
 class CommandList(object):
     def __init__(self, *args, **kwds):
         self.registry = {}
@@ -67,10 +75,7 @@ class CommandList(object):
                 cmd.safe()
             except:
                 pass
-            confirm = raw_input('OK to execute "grit %s %s"? (y/N) ' %
-                                (name, ' '.join(args)))
-            if not confirm.lower().startswith('y'):
-                print('Cancelled.', file=sys.stderr)
+            if not confirm('execute "grit %s %s"' % (name, ' '.join(args))):
                 return
         cmd.function(*args)
 

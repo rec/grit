@@ -54,7 +54,6 @@ API = 'https://api.github.com'
 
 def api(*parts, **kwds):
     url = '/'.join((API, ) + parts)
-    ### if kwds:
 
     try:
         if ARGS.verbose:
@@ -65,21 +64,24 @@ def api(*parts, **kwds):
         raise
     return json.load(stream)
 
-#def paged_api(*parts):
-
-
 def pulls():
     result = {}
     for p in api('repos', Settings.PROJECT_USER, Settings.PROJECT, 'pulls'):
         result[p['number']] = p['head']['label'], p['title']
     return result
 
+def split_branch(branch):
+    if ':' in branch:
+        return branch.split(':')
+    return Settings.PROJECT_USER, branch
+
 def pull_branches(user=Settings.USER):
     result = {}
     for number, (branch, _) in pulls().items():
-        u, b = branch.split(':')
-        if u == user:
+        u, b = split_branch(branch)
+        if user and u == user:
             result[b] = number
+
     return result
 
 def branches(user=Settings.USER):
