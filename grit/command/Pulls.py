@@ -29,4 +29,4 @@ def pull_urls():
 
 def pulls():
     for number, p in reversed(sorted(Git.pulls().items())):
-        print(_to_string(number, *p))
+        print(_to_string(number, p.branch, p.title))

@@ -71,9 +71,9 @@ def get_format_string(name, user, context):
 
         if user == Settings.USER:
             branch_name = '%s:%s' % (user, Git.branch())
-            for number, (bname, _) in Git.pulls().items():
-                if bname == branch_name:
-                    context['number'] = number
+            for pull in Git.pulls().items():
+                if pull.branch == branch_name:
+                    context['number'] = pull.number
                     return _PULL
             else:
                 return _NEW_PULL

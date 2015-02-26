@@ -52,7 +52,7 @@ def rotate_local_branch(reverse=False, **kwds):
 
 API = 'https://api.github.com'
 
-def api(*parts, **kwds):
+def api(*parts):
     url = '/'.join((API, ) + parts)
 
     try:
@@ -64,10 +64,34 @@ def api(*parts, **kwds):
         raise
     return json.load(stream)
 
+def default_api(*parts):
+    return api(parts[0], Settings.PROJECT_USER, Settings.PROJECT, *parts[1:])
+
+LAST_PULLS = {}
+
+class Pull(object):
+    def __init__(self, pull):
+        self.number = pull['number']
+        self.branch = pull['head']['label']
+        self.title = pull['title']
+
+    @property
+    def labels(self):
+        try:
+            return self._labels
+        except AttributeError:
+            labels = default_api('repos', 'issues', str(self.number), 'labels')
+            self._labels = [x['name'] for x in labels]
+            return self._labels
+
+
 def pulls():
     result = {}
-    for p in api('repos', Settings.PROJECT_USER, Settings.PROJECT, 'pulls'):
-        result[p['number']] = p['head']['label'], p['title']
+    global LAST_PULLS
+    LAST_PULLS = default_api('repos', 'pulls')
+    for p in LAST_PULLS:
+        pull = Pull(p)
+        result[pull.number] = pull
     return result
 
 def split_branch(branch):
@@ -77,10 +101,10 @@ def split_branch(branch):
 
 def pull_branches(user=Settings.USER):
     result = {}
-    for number, (branch, _) in pulls().items():
-        u, b = split_branch(branch)
+    for pull in pulls().items():
+        u, b = split_branch(pull.branch)
         if user and u == user:
-            result[b] = number
+            result[b] = pull.number
 
     return result
 
@@ -98,6 +122,9 @@ def copy_from_remote(from_branch, to_branch, remote='upstream'):
 
 def rebase_abort():
     try:
-        git('rebase --abort')
+        git('rebase', '--abort')
     except:
         pass
+
+def commit_id():
+    return git('rev-parse', 'HEAD')

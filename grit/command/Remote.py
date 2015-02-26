@@ -24,7 +24,7 @@ grit r[emote] <user> [<nickname>]
 def _existing_remotes(cwd):
     return set(Call.call_raw('git remote', cwd=cwd).split())
 
-def _add_remote(user, nickname, cwd):
+def add_remote(user, nickname, cwd=None):
     remote = _REMOTE.format(
         user=user, nickname=nickname, project=Settings.PROJECT)
     Call.call(remote, cwd=cwd)

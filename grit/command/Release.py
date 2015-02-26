@@ -21,10 +21,16 @@ _MATCHER = re.compile(
 
 SAFE = False
 
+PASS = 'Passed'
+NO_PASS = set(['API Change', 'Hold', 'Rebase', 'Submitted', 'Tx Change'])
+
 def _get_tag(line):
     m = _MATCHER.search(line)
     if m:
         return m.group(1)
+
+def _pull_accepted(pull):
+    return PASS in pull.labels and not NO_PASS.intersection(pull.labels)
 
 def release(*requests):
     requests = list(requests)
@@ -42,6 +48,14 @@ def release(*requests):
         Delete.delete(next_branch)
         Git.copy_from_remote(base_branch, next_branch)
 
+    if 'all' in requests:
+        requests = []
+        for number, pull in sorted(Git.pulls().items()):
+            if PASS in pull.labels and not NO_PASS.intersection(pull.labels):
+                requests.append(pull.number)
+        print(requests)
+        return
+
     for i, request in enumerate(requests):
         pull = ''
         if request.isdigit():
@@ -58,12 +72,18 @@ def release(*requests):
         user, branch, pull = request
         print('------------------------------------------------' )
         print('%s:%s %s' % (user, branch, pull))
-        nickname = inverse[user]
+        try:
+            nickname = inverse[user]
+        except KeyError:
+            Remote.add_remote(user, user)
+            nickname = user
         if user == Settings.USER:
             nickname = 'origin'
         Git.git('fetch', nickname, branch)
         b1 = Git.git('checkout', nickname + '/' + branch)
         tag1 = _get_tag(b1)
+        other_tag1 = Git.commit_id()
+        assert tag1 == other_tag1
 
         Git.git('rebase', '--preserve-merges', 'origin/' + next_branch)
         b2 = Git.git('checkout', next_branch)

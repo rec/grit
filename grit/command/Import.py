@@ -21,14 +21,15 @@ SAFE = True
 
 def parse_branch(branch):
     try:
-        pull = int(branch)
+        pull_number = int(branch)
     except:
         pass
     else:
         pulls = Git.pulls()
-        if pull not in pulls:
+        if pull_number not in pulls:
             raise ValueError(_ERROR % (pull, ' '.join(sorted(pulls))))
-        branch, _ = pulls[pull]
+        pull = pulls[pull_number]
+        branch = pull.branch
     if ':' in branch:
         return branch.split(':', 1)
     else:
