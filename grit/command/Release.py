@@ -5,10 +5,12 @@ import random
 import re
 
 from grit import Git
-from grit.command import Remote
-from grit.command import Delete
 from grit import Project
 from grit import Settings
+from grit.Singleton import singleton
+from grit.command import Delete
+from grit.command import Remote
+from grit.command import Version
 
 HELP = """
 grit release
@@ -24,71 +26,94 @@ SAFE = False
 PASS = 'Passed'
 NO_PASS = set(['API Change', 'Hold', 'Rebase', 'Submitted', 'Tx Change'])
 
-def _get_tag(line):
-    m = _MATCHER.search(line)
-    if m:
-        return m.group(1)
+@singleton
+def base_branch():
+    return Project.settings('git').get('base_branch', 'develop')
+
+@singleton
+def next_branch():
+    return Project.settings('git').get('next_branch', 'develop')
 
 def _pull_accepted(pull):
     return PASS in pull.labels and not NO_PASS.intersection(pull.labels)
 
-def release(*requests):
-    requests = list(requests)
-    settings = Project.settings('git')  # TODO: This is empty and shouldn't be.
-    base_branch = settings.get('base_branch', 'develop')
-    next_branch = settings.get('next_branch', 'develop-next')
-    pulls = Git.pulls()
-    remotes = Remote.remote()
-    inverse = dict((v, k) for (k, v) in remotes)
-    Git.rebase_abort()
-
-    if 'continue' in requests:
-        requests.remove('continue')
+@Git.transaction
+def _pull_request(pull):
+    print('------------------------------------------------' )
+    print(pull)
+    if pull.user == Settings.USER:
+        nickname = 'origin'
     else:
-        Delete.delete(next_branch)
-        Git.copy_from_remote(base_branch, next_branch)
-
-    if 'all' in requests:
-        requests = []
-        for number, pull in sorted(Git.pulls().items()):
-            if PASS in pull.labels and not NO_PASS.intersection(pull.labels):
-                requests.append(pull.number)
-        print(requests)
-        return
-
-    for i, request in enumerate(requests):
-        pull = ''
-        if request.isdigit():
-            pull = int(request)
-            req = pulls.get(pull)
-            if req:
-                request = req[0]
-            else:
-                raise ValueError('No such pull request #' + request)
-        user, branch = Git.split_branch(request)
-        requests[i] = user, branch, pull
-
-    for request in requests:
-        user, branch, pull = request
-        print('------------------------------------------------' )
-        print('%s:%s %s' % (user, branch, pull))
         try:
-            nickname = inverse[user]
+            nickname = Remote.inverse()[pull.user]
         except KeyError:
-            Remote.add_remote(user, user)
-            nickname = user
-        if user == Settings.USER:
-            nickname = 'origin'
-        Git.git('fetch', nickname, branch)
-        b1 = Git.git('checkout', nickname + '/' + branch)
-        tag1 = _get_tag(b1)
-        other_tag1 = Git.commit_id()
-        assert tag1 == other_tag1
+            Remote.add_remote(pull.user, pull.user)
+            nickname = pull.user
 
-        Git.git('rebase', '--preserve-merges', 'origin/' + next_branch)
-        b2 = Git.git('checkout', next_branch)
-        tag2 = _get_tag(b2)
-        if (not tag2 or tag1):
-            raise ValueError("Didn't find any tags")
-        Git.git('merge', '--ff-only', tag2 or tag1)
+    commits = []
+    Git.git('fetch', nickname, pull.branch)
+    Git.git('checkout', nickname + '/' + pull.branch)
+    Git.git('rebase', '--preserve-merges', 'origin/' + next_branch())
+    commit_id = Git.commit_id()
+
+    Git.git('checkout', next_branch())
+    Git.git('merge', '--ff-only', commit_id[:6])
+    Git.git('push')
+
+def _make_pulls(branches):
+    if not branches:
+        for number, pull in sorted(Git.pulls().items()):
+            if _pull_accepted(pull):
+                branches.append(number)
+
+    pulls = Git.pulls()
+    for branch in branches:
+        branch = int(branch)
+        try:
+            yield pulls[branch]
+        except KeyError:
+            raise ValueError('No such pull request #' + branch)
+
+def _print_pulls(message, pulls):
+    if pulls:
+        print(message)
+        print('\n'.join(str(p) for p in pulls))
+
+def release(*pulls):
+    Git.rebase_abort()
+    pulls = list(pulls)
+    add_version = 'noversion' not in pulls
+    if not add_version:
+        pulls.remove('noversion')
+
+    if 'continue' in pulls:
+        pulls.remove('continue')
+    else:
+        Delete.delete(next_branch())
+        Git.copy_from_remote(base_branch(), next_branch())
+
+    pulls = list(_make_pulls(pulls))
+    if not pulls:
+        raise Exception('No pulls ready!')
+
+    _print_pulls('Building release branch for:', pulls)
+    print()
+    success = []
+    failure = []
+    exceptions = []
+    for p in pulls:
+        try:
+            _pull_request(p)
+        except Exception as e:
+            failure.append([p, e])
+        else:
+            success.append(p)
+
+    _print_pulls('\nSuccessfully pulled:', success)
+
+    for pull, e in failure:
+        print('%d FAILED: %s' % (pull.number, str(e)))
+
+    if add_version and success:
+        Version.version()
         Git.git('push')

@@ -28,3 +28,10 @@ def startswith(a, b):
     if ARGS.case_insensitive:
         a, b = a.lower(), b.lower()
     return a.startswith(b)
+
+def join_sentence(*x):
+    if not x:
+        return ''
+    if len(x) == 1:
+        return str(x[0])
+    return '%s and %s' % (','.join(str(i) for i in x[:-1]), x[-1])
