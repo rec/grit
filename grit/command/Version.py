@@ -7,11 +7,14 @@ import semver
 VERSION = re.compile(r'\d+\.\d+\.\d+(?:-\w\d*)')
 
 from grit.Args import ARGS
+from grit import ChangeLog
 from grit import CommandList
 from grit import File
 from grit import Git
 from grit import GitRoot
 from grit import Project
+from grit import String
+from grit.Singleton import singleton
 
 HELP = """
 grit v[ersion] [<version-number>]
@@ -21,16 +24,19 @@ grit v[ersion] [<version-number>]
 
 SAFE = True
 
-def version(version_number=None):
-    root = GitRoot.root()
+def get_version():
     files = Project.settings('version')['files']
-
     for f in files:
         old_version = File.search(f, VERSION)
         if old_version:
-            break
-    else:
-        raise Exception('ERROR: no version number found.')
+            return old_version
+    raise Exception('ERROR: no version number found.')
+
+def version_commit(version_number=None, success=None, failure=None):
+    root = GitRoot.root()
+    files = Project.settings('version')['files']
+
+    old_version = get_version()
 
     if version_number == old_version:
         raise Exception('Version number is already %s' % old_version)
@@ -41,4 +47,10 @@ def version(version_number=None):
         return
     for f in files:
         File.subn(os.path.join(root, f), VERSION, version_number)
+
+    if success or failure:
+        Changelog.add_status_line(version_number, success, failure)
     Git.git('commit', '-am', 'Set version to %s' % version_number)
+
+def version(version_number=None):
+    version_commit(version_number)

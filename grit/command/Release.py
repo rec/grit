@@ -5,10 +5,12 @@ import random
 import re
 import time
 
+from grit import ChangeLog
 from grit import Git
 from grit import Project
 from grit import Settings
 from grit import String
+from grit.Args import ARGS
 from grit.Singleton import singleton
 from grit.command import Delete
 from grit.command import Open
@@ -35,7 +37,7 @@ def base_branch():
 
 @singleton
 def next_branch():
-    return Project.settings('git').get('next_branch', 'develop-next')
+    return base_branch() + '-next'
 
 def _pull_accepted(pull):
     return PASS in pull.labels and not NO_PASS.intersection(pull.labels)
@@ -77,7 +79,7 @@ def _make_pulls(branches):
         except KeyError:
             raise ValueError('No such pull request #' + branch)
 
-def _print_short_pulls(message, pulls):
+def _print_long_pulls(message, pulls):
     if pulls:
         print(message)
         print('\n'.join(str(p) for p in pulls))
@@ -87,27 +89,26 @@ def _print_pulls(message, pulls):
         print(message, String.join_words(pulls))
 
 def release(*pulls):
-    Git.rebase_abort()
-
-    def remove_option(option):
-        if option in pulls:
-            pulls.remove(option)
-            return True
-
     pulls = list(pulls)
-    add_version = not remove_option('noversion')
-    from_fresh = not remove_option('continue')
-    open_commits = not remove_option('noopen')
-
-    if from_fresh:
-        Delete.delete(next_branch())
-        Git.copy_from_remote(base_branch(), next_branch())
 
     pulls = list(_make_pulls(pulls))
     if not pulls:
         raise Exception('No pulls ready!')
 
-    _print_pulls('Building release branch for', pulls)
+    previous_pulls = set(ChangeLog.status()[1])
+    if previous_pulls == set(p.number for p in pulls):
+        if not ARGS.force:
+            print('No change from', ChangeLog.status_line())
+            return True
+    print('previous_pulls', previous_pulls, pulls)
+
+    Git.rebase_abort()
+    Git.git('reset', '--hard', 'HEAD')
+
+    Delete.delete(next_branch())
+    Git.copy_from_remote(base_branch(), next_branch())
+
+    _print_long_pulls('Building release branch for', pulls)
     print()
     success = []
     failure = []
@@ -128,13 +129,13 @@ def release(*pulls):
     _print_pulls('FAILED:', failure)
 
     if success:
-        if add_version:
-            Version.version()
+        Version.version_commit(
+            version_number=None, success=success, failure=failure)
         git('push')
 
         time.sleep(1)  # Make sure github gets it.
 
-        if open_commits:
+        if False:
             Open.open('commits')
         if False:  # open_pull
             for p in success:
