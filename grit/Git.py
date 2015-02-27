@@ -120,7 +120,7 @@ def transaction(f):
             f(*args, **kwds)
         except:
             rebase_abort()
-            git('reset', '--hard', commit[:6])
+            git('reset', '--hard', commit)
             raise
 
     return wrapper
@@ -149,9 +149,13 @@ def copy_from_remote(from_branch, to_branch, remote='upstream'):
 
 def rebase_abort():
     try:
-        git('rebase', '--abort')
+        print('try to abort...', end='')
+        git('rebase', '--abort', print=None)
+        print('success')
     except:
+        print('fail')
         pass
 
-def commit_id():
-    return git('rev-parse', 'HEAD')
+def commit_id(short=True):
+    id = git('rev-parse', 'HEAD')
+    return id[:8] if short else id

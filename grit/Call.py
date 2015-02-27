@@ -16,7 +16,7 @@ def call_raw(command, **kwds):
         raise ValueError('Couldn\'t execute "%s", errorcode=%s' %
                          ' '.join(cmd), e.returncode)
 
-def call(command, callback=None, **kwds):
+def call(command, callback=None, print=print, **kwds):
     cmd = split_safe(command)
     returncode = 0
     error = ''
@@ -28,14 +28,14 @@ def call(command, callback=None, **kwds):
             error = e.output
     else:
         returncode = subprocess.call(cmd, **kwds)
-    if returncode:
+    if returncode and print:
         print('ERROR:'
               ' command =', ' '.join(cmd),
               ' code =', returncode)
         error and print(error)
     return returncode
 
-def call_value(command, **kwds):
+def call_value(command, print=print, **kwds):
     cmd = split_safe(command)
     try:
         return 0, subprocess.check_output(cmd, **kwds)
@@ -43,7 +43,7 @@ def call_value(command, **kwds):
         print('ERROR:'
               ' command =', ' '.join(cmd),
               ' code =', e.returncode)
-        e.output and print(e.output)
+        e.output and print and print(e.output)
         return e.returncode, ''
 
 def for_each(commands, before=None, after=None, **kwds):

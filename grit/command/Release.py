@@ -57,7 +57,7 @@ def _pull_request(pull):
     commit_id = Git.commit_id()
 
     Git.git('checkout', next_branch())
-    Git.git('merge', '--ff-only', commit_id[:6])
+    Git.git('merge', '--ff-only', commit_id)
     Git.git('push')
 
 def _make_pulls(branches):
