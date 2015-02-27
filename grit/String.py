@@ -29,9 +29,10 @@ def startswith(a, b):
         a, b = a.lower(), b.lower()
     return a.startswith(b)
 
-def join_sentence(*x):
-    if not x:
+def join_words(words):
+    words = list(words)
+    if not words:
         return ''
-    if len(x) == 1:
-        return str(x[0])
-    return '%s and %s' % (','.join(str(i) for i in x[:-1]), x[-1])
+    if len(words) == 1:
+        return str(words[0])
+    return '%s and %s' % (', '.join(str(i) for i in words[:-1]), words[-1])

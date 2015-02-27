@@ -47,12 +47,22 @@ _DIFF = 'https://github.com/{user}/{project}/compare/{branch}'
 def open_url(url):
     Call.call('%s %s' % (_OPEN_COMMANDS[platform.system()], url))
 
+def get_context(user=None):
+    return {
+        'branch': Git.branch(),
+        'user': user or Settings.USER,
+        'project_user': Settings.PROJECT_USER,
+        'project': Settings.PROJECT,
+    }
+
 def open_path(branch, path,
              project=Settings.PROJECT,
              user=Settings.USER):
     url = _URL.format(branch=branch, path=path, project=project, user=user)
     open_url(url)
 
+def get_commits(user=None):
+    return _COMMIT.format(**get_context(user))
 
 def get_format_string(name, user, context):
     if name and 'commits'.startswith(name):
@@ -71,9 +81,9 @@ def get_format_string(name, user, context):
 
         if user == Settings.USER:
             branch_name = '%s:%s' % (user, Git.branch())
-            for pull in Git.pulls().items():
+            for number, pull in Git.pulls().items():
                 if pull.branch == branch_name:
-                    context['number'] = pull.number
+                    context['number'] = number
                     return _PULL
             else:
                 return _NEW_PULL
@@ -119,12 +129,6 @@ def open(name='', user=''):
     else:
         user = Settings.USER
 
-    context = {
-        'branch': Git.branch(),
-        'user': user,
-        'project_user': Settings.PROJECT_USER,
-        'project': Settings.PROJECT,
-    }
-
+    context = get_context(user)
     fmt = get_format_string(name, user, context)
     open_url(fmt.format(**context))

@@ -1,14 +1,17 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os.path
+import os
 import random
 import re
+import time
 
 from grit import Git
 from grit import Project
 from grit import Settings
+from grit import String
 from grit.Singleton import singleton
 from grit.command import Delete
+from grit.command import Open
 from grit.command import Remote
 from grit.command import Version
 
@@ -37,10 +40,11 @@ def next_branch():
 def _pull_accepted(pull):
     return PASS in pull.labels and not NO_PASS.intersection(pull.labels)
 
+def git(*args):
+    return Git.git(*args, print=None)
+
 @Git.transaction
 def _pull_request(pull):
-    print('------------------------------------------------' )
-    print(pull)
     if pull.user == Settings.USER:
         nickname = 'origin'
     else:
@@ -51,14 +55,14 @@ def _pull_request(pull):
             nickname = pull.user
 
     commits = []
-    Git.git('fetch', nickname, pull.branch)
-    Git.git('checkout', nickname + '/' + pull.branch)
-    Git.git('rebase', '--preserve-merges', 'origin/' + next_branch())
+    git('fetch', nickname, pull.branch)
+    git('checkout', nickname + '/' + pull.branch)
+    git('rebase', '--preserve-merges', 'origin/' + next_branch())
     commit_id = Git.commit_id()
 
-    Git.git('checkout', next_branch())
-    Git.git('merge', '--ff-only', commit_id)
-    Git.git('push')
+    git('checkout', next_branch())
+    git('merge', '--ff-only', commit_id)
+    git('push')
 
 def _make_pulls(branches):
     if not branches:
@@ -74,21 +78,29 @@ def _make_pulls(branches):
         except KeyError:
             raise ValueError('No such pull request #' + branch)
 
-def _print_pulls(message, pulls):
+def _print_short_pulls(message, pulls):
     if pulls:
         print(message)
         print('\n'.join(str(p) for p in pulls))
 
+def _print_pulls(message, pulls):
+    if pulls:
+        print(message, String.join_words(pulls))
+
 def release(*pulls):
     Git.rebase_abort()
-    pulls = list(pulls)
-    add_version = 'noversion' not in pulls
-    if not add_version:
-        pulls.remove('noversion')
 
-    if 'continue' in pulls:
-        pulls.remove('continue')
-    else:
+    def remove_option(option):
+        if option in pulls:
+            pulls.remove(option)
+            return True
+
+    pulls = list(pulls)
+    add_version = not remove_option('noversion')
+    from_fresh = not remove_option('continue')
+    open_commits = not remove_option('noopen')
+
+    if from_fresh:
         Delete.delete(next_branch())
         Git.copy_from_remote(base_branch(), next_branch())
 
@@ -96,24 +108,35 @@ def release(*pulls):
     if not pulls:
         raise Exception('No pulls ready!')
 
-    _print_pulls('Building release branch for:', pulls)
+    _print_pulls('Building release branch for', pulls)
     print()
     success = []
     failure = []
     exceptions = []
     for p in pulls:
         try:
+            print(p.number, '...', sep='', end='')
             _pull_request(p)
         except Exception as e:
-            failure.append([p, e])
+            failure.append(p.number)
+            print('FAILED')
         else:
-            success.append(p)
+            print('ok')
+            success.append(p.number)
 
-    _print_pulls('\nSuccessfully pulled:', success)
+    commits = Open.get_commits()
+    _print_pulls('\Proposed new develop branch', commits, 'for pulls', success)
+    _print_pulls('FAILED:', failure)
 
-    for pull, e in failure:
-        print('%d FAILED: %s' % (pull.number, str(e)))
+    if success:
+        if add_version:
+            Version.version()
+            git('push')
 
-    if add_version and success:
-        Version.version()
-        Git.git('push')
+        time.sleep(1)  # Make sure github gets it.
+
+        if open_commits:
+            Open.open('commits')
+        if False:  # open_pull
+            for p in success:
+                Open.open(str(p))

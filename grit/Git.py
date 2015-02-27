@@ -149,11 +149,8 @@ def copy_from_remote(from_branch, to_branch, remote='upstream'):
 
 def rebase_abort():
     try:
-        print('try to abort...', end='')
         git('rebase', '--abort', print=None)
-        print('success')
     except:
-        print('fail')
         pass
 
 def commit_id(short=True):

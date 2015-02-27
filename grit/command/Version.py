@@ -4,7 +4,7 @@ import os
 import re
 import semver
 
-VERSION = re.compile(r'\d+\.\d+\.\d+(?:-\w\d?)')
+VERSION = re.compile(r'\d+\.\d+\.\d+(?:-\w\d*)')
 
 from grit.Args import ARGS
 from grit import CommandList
