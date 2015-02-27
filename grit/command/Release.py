@@ -35,7 +35,7 @@ def base_branch():
 
 @singleton
 def next_branch():
-    return Project.settings('git').get('next_branch', 'develop')
+    return Project.settings('git').get('next_branch', 'develop-next')
 
 def _pull_accepted(pull):
     return PASS in pull.labels and not NO_PASS.intersection(pull.labels)
@@ -62,7 +62,6 @@ def _pull_request(pull):
 
     git('checkout', next_branch())
     git('merge', '--ff-only', commit_id)
-    git('push')
 
 def _make_pulls(branches):
     if not branches:
@@ -125,13 +124,13 @@ def release(*pulls):
             success.append(p.number)
 
     commits = Open.get_commits()
-    _print_pulls('\Proposed new develop branch', commits, 'for pulls', success)
+    _print_pulls('Proposed new develop branch %s for pulls' % commits, success)
     _print_pulls('FAILED:', failure)
 
     if success:
         if add_version:
             Version.version()
-            git('push')
+        git('push')
 
         time.sleep(1)  # Make sure github gets it.
 
