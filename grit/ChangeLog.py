@@ -1,12 +1,15 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from grit.Singleton import singleton
+import re
+
+from grit.Cache import cached
 from grit import Project
+from grit import String
 
 def filename():
     return Project.settings('version')['changelog']
 
-@singleton
+@cached
 def changelog():
     lines = open(filename()).readlines()
     while lines and not lines[-1].strip():
@@ -24,14 +27,8 @@ def status(line=None):
     try:
         version, pulls = line.split(':')
     except:
-        return
-    results = []
-    for p in pulls.replace('.', '').split():
-        try:
-            results.append(int(p))
-        except:
-            continue
-    return version, results
+        return '', []
+    return version, [int(p) for p in re.findall('\d+', pulls)]
 
 def add_status_line(version, success, failure):
     parts = [version + ': ']

@@ -13,8 +13,6 @@ from grit import File
 from grit import Git
 from grit import GitRoot
 from grit import Project
-from grit import String
-from grit.Singleton import singleton
 
 HELP = """
 grit v[ersion] [<version-number>]
@@ -49,7 +47,7 @@ def version_commit(version_number=None, success=None, failure=None):
         File.subn(os.path.join(root, f), VERSION, version_number)
 
     if success or failure:
-        Changelog.add_status_line(version_number, success, failure)
+        ChangeLog.add_status_line(version_number, success, failure)
     Git.git('commit', '-am', 'Set version to %s' % version_number)
 
 def version(version_number=None):

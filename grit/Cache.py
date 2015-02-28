@@ -1,31 +1,27 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import json
-import os
-import subprocess
+from functools import wraps
+from weakref import WeakSet
 
-def _get_directory():
-    try:
-        d = os.path.expanduser('~/.grit-d/cache')
-        if not os.path.isdir(d):
-            os.makedirs(d)
-        return d
-    except:
-        return ''
+class Cache(object):
+    CACHED = WeakSet()
 
-CACHE_DIRECTORY = _get_directory()
+    def __init__(self, function):
+        self.function = function
+        self.none = object()
+        self.clear()
+        self.CACHED.add(self)
 
-def _filename(name):
-    return os.path.join(CACHE_DIRECTORY, '%s.json' % name)
+    def clear(self):
+        self.value = self.none
 
-def get(name, default=None):
-    try:
-        return json.load(open(_filename(name)))
-    except:
-        return default
+    def __call__(self):
+        if self.value is self.none:
+            self.value = self.function()
+        return self.value
 
-def put(name, value):
-    try:
-        json.dump(value, open(_filename(name), 'w'))
-    except:
-        print('Unable to store defaults', name)
+cached = Cache
+
+def clear():
+    for c in Cache.CACHED:
+        c.clear()

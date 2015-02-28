@@ -7,7 +7,7 @@ import urllib2
 from grit import Call
 from grit import Project
 from grit import Settings
-from grit.Singleton import singleton
+from grit.Cache import cached
 
 _REMOTE = """
 git remote add {nickname} git@github.com:{user}/{project}.git
@@ -45,10 +45,10 @@ def remote(user='all', nickname='', cwd=None):
             add_remote(user, nickname, cwd=cwd, existing=existing)
     return remotes
 
-@singleton
+@cached
 def remotes():
     return remote()
 
-@singleton
+@cached
 def inverse():
     return dict((v, k) for (k, v) in remotes())

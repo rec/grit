@@ -27,6 +27,13 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    '--period', '-p',
+    default=0,
+    type=int,
+    help='For looping functions, how many seconds to wait before repeating.',
+)
+
+parser.add_argument(
     '--reverse', '-r',
     action='store_true',
     help='If true, rotate and other searches are in reverse order.',

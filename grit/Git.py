@@ -7,7 +7,7 @@ import urllib2
 from functools import wraps
 
 from grit.Args import ARGS
-from grit.Singleton import singleton
+from grit.Cache import cached
 from grit import Call
 from grit import File
 from grit import GitRoot
@@ -92,7 +92,7 @@ class Pull(object):
     def __repr__(self):
         return 'Pull(%s)' % str(self)
 
-@singleton
+@cached
 def pulls():
     result = {}
     for p in default_api('repos', 'pulls'):
@@ -100,11 +100,11 @@ def pulls():
         result[pull.number] = pull
     return result
 
-@singleton
+@cached
 def issues():
     return default_api('repos', 'issues')
 
-@singleton
+@cached
 def labels():
     result = {}
     for issue in issues():
@@ -156,3 +156,10 @@ def rebase_abort():
 def commit_id(short=True):
     id = git('rev-parse', 'HEAD')
     return id[:8] if short else id
+
+def force_checkout(branch):
+    try:
+        git('checkout', branch, print=None)
+    except:
+        git('checkout', '-b', branch)
+        git('push', '--set-upstream', 'origin', branch)

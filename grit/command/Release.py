@@ -5,13 +5,14 @@ import random
 import re
 import time
 
+from grit import Cache
 from grit import ChangeLog
 from grit import Git
 from grit import Project
 from grit import Settings
 from grit import String
 from grit.Args import ARGS
-from grit.Singleton import singleton
+from grit.Cache import cached
 from grit.command import Delete
 from grit.command import Open
 from grit.command import Remote
@@ -31,19 +32,20 @@ SAFE = False
 PASS = 'Passed'
 NO_PASS = set(['API Change', 'Hold', 'Rebase', 'Submitted', 'Tx Change'])
 
-@singleton
+@cached
 def base_branch():
     return Project.settings('git').get('base_branch', 'develop')
 
-@singleton
+@cached
 def next_branch():
     return base_branch() + '-next'
 
+@cached
+def working_branch():
+    return base_branch() + '-working'
+
 def _pull_accepted(pull):
     return PASS in pull.labels and not NO_PASS.intersection(pull.labels)
-
-def git(*args):
-    return Git.git(*args, print=None)
 
 @Git.transaction
 def _pull_request(pull):
@@ -57,27 +59,30 @@ def _pull_request(pull):
             nickname = pull.user
 
     commits = []
+    printer = print if ARGS.verbose else None
+    def git(*args):
+        Git.git(*args, print=printer)
+
     git('fetch', nickname, pull.branch)
     git('checkout', nickname + '/' + pull.branch)
-    git('rebase', '--preserve-merges', 'origin/' + next_branch())
+    git('rebase', '--preserve-merges', working_branch())
     commit_id = Git.commit_id()
 
-    git('checkout', next_branch())
+    git('checkout', working_branch())
     git('merge', '--ff-only', commit_id)
 
 def _make_pulls(branches):
+    branches = list(branches)
     if not branches:
         for number, pull in sorted(Git.pulls().items()):
             if _pull_accepted(pull):
                 branches.append(number)
 
     pulls = Git.pulls()
-    for branch in branches:
-        branch = int(branch)
-        try:
-            yield pulls[branch]
-        except KeyError:
-            raise ValueError('No such pull request #' + branch)
+    try:
+        return [pulls[int(b)] for b in branches]
+    except KeyError:
+        raise ValueError('Bad pull request in ' + str(branches))
 
 def _print_long_pulls(message, pulls):
     if pulls:
@@ -88,25 +93,21 @@ def _print_pulls(message, pulls):
     if pulls:
         print(message, String.join_words(pulls))
 
-def release(*pulls):
-    pulls = list(pulls)
-
-    pulls = list(_make_pulls(pulls))
-    if not pulls:
-        raise Exception('No pulls ready!')
-
+def _release(pulls):
     previous_pulls = set(ChangeLog.status()[1])
     if previous_pulls == set(p.number for p in pulls):
         if not ARGS.force:
             print('No change from', ChangeLog.status_line())
-            return True
-    print('previous_pulls', previous_pulls, pulls)
+            return
+
+    print(previous_pulls, pulls)
 
     Git.rebase_abort()
+    Git.git('clean', '-f')
     Git.git('reset', '--hard', 'HEAD')
 
-    Delete.delete(next_branch())
-    Git.copy_from_remote(base_branch(), next_branch())
+    Delete.delete(working_branch())
+    Git.copy_from_remote(base_branch(), working_branch())
 
     _print_long_pulls('Building release branch for', pulls)
     print()
@@ -124,19 +125,27 @@ def release(*pulls):
             print('ok')
             success.append(p.number)
 
-    commits = Open.get_commits()
-    _print_pulls('Proposed new develop branch %s for pulls' % commits, success)
-    _print_pulls('FAILED:', failure)
-
     if success:
         Version.version_commit(
             version_number=None, success=success, failure=failure)
-        git('push')
 
-        time.sleep(1)  # Make sure github gets it.
+    if success or not failure:
+        commit_id = Git.commit_id()
+        Git.force_checkout(next_branch())
+        Git.git('reset', '--hard', commit_id)
+        Git.git('push', '-f')
 
-        if False:
-            Open.open('commits')
-        if False:  # open_pull
-            for p in success:
-                Open.open(str(p))
+    commits = Open.get_commits()
+    plural = '' if len(commits) == 1 else 's'
+    _print_pulls('Proposed new develop branch %s for pull%s' %
+                 (commits, plural), success)
+    _print_pulls('FAILED:', failure)
+
+
+def release(*branches):
+    while True:
+        _release(_make_pulls(branches))
+        if branches or not ARGS.period:
+            break
+        time.sleep(ARGS.period)
+        Cache.clear()
