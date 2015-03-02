@@ -93,14 +93,16 @@ def _print_pulls(message, pulls):
     if pulls:
         print(message, String.join_words(pulls))
 
-def _release(pulls):
-    previous_pulls = set(ChangeLog.status()[1])
-    if previous_pulls == set(p.number for p in pulls):
+def _release(pulls, previous_pulls, commit_id):
+    current_pulls = dict((p.number, p.commit_id) for p in pulls)
+    current_pulls['commit_id'] = commit_id
+    if previous_pulls == current_pulls:
         if not ARGS.force:
             print('No change from', ChangeLog.status_line())
             return
 
-    print(previous_pulls, pulls)
+    previous_pulls.clear()
+    previous_pulls.update(current_pulls)
 
     Git.rebase_abort()
     Git.git('clean', '-f')
@@ -143,8 +145,10 @@ def _release(pulls):
 
 
 def release(*branches):
+    previous_pulls = {}
     while True:
-        _release(_make_pulls(branches))
+        commit_id = Git.commit_id(upstream=True, branch=base_branch())
+        _release(_make_pulls(branches), previous_pulls, commit_id)
         if branches or not ARGS.period:
             break
         time.sleep(ARGS.period)

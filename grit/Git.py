@@ -80,6 +80,7 @@ class Pull(object):
         self.number = pull['number']
         self.user, self.branch = split_branch(pull['head']['label'])
         self.title = pull['title']
+        self.commit_id = pull['head']['sha']
 
     @property
     def labels(self):
@@ -153,8 +154,12 @@ def rebase_abort():
     except:
         pass
 
-def commit_id(short=True):
-    id = git('rev-parse', 'HEAD')
+def commit_id(short=True, upstream=False, branch='develop'):
+    if upstream:
+        git('fetch', 'upstream', branch)
+        id = git('show-ref', 'upstream/' + branch).split()[0]
+    else:
+        id = git('rev-parse', 'HEAD')
     return id[:8] if short else id
 
 def force_checkout(branch):
