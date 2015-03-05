@@ -98,7 +98,8 @@ def _release(pulls, previous_pulls, commit_id):
     current_pulls['commit_id'] = commit_id
     if previous_pulls == current_pulls:
         if not ARGS.force:
-            print('No change from', ChangeLog.status_line())
+            print(String.timestamp() + ':',
+                  'No change from', ChangeLog.status_line())
             return
 
     previous_pulls.clear()
@@ -111,7 +112,8 @@ def _release(pulls, previous_pulls, commit_id):
     Delete.delete(working_branch())
     Git.copy_from_remote(base_branch(), working_branch())
 
-    _print_long_pulls('Building release branch for', pulls)
+    _print_long_pulls(
+        String.timestamp() + ': building release branch for', pulls)
     print()
     success = []
     failure = []
@@ -127,21 +129,21 @@ def _release(pulls, previous_pulls, commit_id):
             print('ok')
             success.append(p.number)
 
-    if success:
-        Version.version_commit(
-            version_number=None, success=success, failure=failure)
+    Version.version_commit(
+        version_number=None, success=success, failure=failure)
 
-    if success or not failure:
-        commit_id = Git.commit_id()
-        Git.force_checkout(next_branch())
-        Git.git('reset', '--hard', commit_id)
-        Git.git('push', '-f')
+    commit_id = Git.commit_id()
+    Git.force_checkout(next_branch())
+    Git.git('reset', '--hard', commit_id)
+    Git.git('push', '-f')
 
     commits = Open.get_commits()
     plural = '' if len(commits) == 1 else 's'
     _print_pulls('Proposed new develop branch %s for pull%s' %
                  (commits, plural), success)
     _print_pulls('FAILED:', failure)
+    if not (success or failure):
+        print(String.timestamp(), ': no pulls ready.')
 
 
 def release(*branches):

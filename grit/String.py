@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import datetime
 import re
 
 from grit.Args import ARGS
@@ -36,3 +37,6 @@ def join_words(words):
     if len(words) == 1:
         return str(words[0])
     return '%s and %s' % (', '.join(str(i) for i in words[:-1]), words[-1])
+
+def timestamp():
+    return datetime.datetime.now().strftime('%a, %d %b %Y %H:%M:%S')
