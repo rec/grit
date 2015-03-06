@@ -40,3 +40,7 @@ def join_words(words):
 
 def timestamp():
     return datetime.datetime.now().strftime('%a, %d %b %Y %H:%M:%S')
+
+def splitlines(s):
+    lines = (i.strip() for i in s.splitlines())
+    return (i for i in lines if i)

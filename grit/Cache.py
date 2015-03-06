@@ -3,6 +3,8 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 from functools import wraps
 from weakref import WeakSet
 
+from grit.Args import ARGS
+
 class Cache(object):
     CACHED = WeakSet()
 
@@ -23,5 +25,7 @@ class Cache(object):
 cached = Cache
 
 def clear():
+    if ARGS.verbose:
+        print('Clearing all caches.')
     for c in Cache.CACHED:
         c.clear()

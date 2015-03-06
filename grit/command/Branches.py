@@ -34,7 +34,7 @@ SAFE = True
 
 def branches(prefix='', *args):
     root = GitRoot.root_container()
-    pulls = Git.pull_branches(Settings.USER)
+    pulls = Git.pull_branches()
 
     if not ARGS.expanded:
         fname = ['']

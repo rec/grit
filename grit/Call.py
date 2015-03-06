@@ -3,13 +3,14 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os.path
 import subprocess
 
+from grit.Args import ARGS
 from grit import File
-from grit.String import split_safe
+from grit import String
 
 DIRECT_CALL = True
 
 def call_raw(command, **kwds):
-    cmd = split_safe(command)
+    cmd = String.split_safe(command)
     try:
         return subprocess.check_output(cmd, **kwds)
     except subprocess.CalledProcessError as e:
@@ -17,7 +18,7 @@ def call_raw(command, **kwds):
                          ' '.join(cmd), e.returncode)
 
 def call(command, callback=None, print=print, **kwds):
-    cmd = split_safe(command)
+    cmd = String.split_safe(command)
     returncode = 0
     error = ''
     if callback:
@@ -36,18 +37,35 @@ def call(command, callback=None, print=print, **kwds):
     return returncode
 
 def call_value(command, print=print, **kwds):
-    cmd = split_safe(command)
+    cmd = String.split_safe(command)
     try:
         return 0, subprocess.check_output(cmd, **kwds)
     except subprocess.CalledProcessError as e:
-        print('ERROR:'
-              ' command =', ' '.join(cmd),
-              ' code =', e.returncode)
-        e.output and print and print(e.output)
+        if print:
+            print('ERROR2:'
+                  ' command =', ' '.join(cmd),
+                  ' code =', e.returncode)
+            e.output and print(e.output)
         return e.returncode, ''
 
+def run(command, print=print, **kwds):
+    command_disp = ' '.join(command)
+    if ARGS.verbose:
+        print('$', command_disp)
+    error, results = call_value(
+        command, stderr=subprocess.STDOUT, print=print, **kwds)
+    if error:
+        raise ValueError("Can't %s, error=%s" % (command_disp, error))
+    if ARGS.verbose:
+        print(results)
+    return results
+
+def runlines(lines, print=print, **substitutions):
+    for line in String.splitlines(lines.format(**substitutions)):
+        run(line.split(), print=print)
+
 def for_each(commands, before=None, after=None, **kwds):
-    for command in filter(None, split_safe(commands, 'splitlines')):
+    for command in filter(None, String.split_safe(commands, 'splitlines')):
         before and before(command)
         if call(command, **kwds):
             after and after(command)

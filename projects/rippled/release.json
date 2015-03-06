@@ -1,0 +1,22 @@
+{
+    "selectors": [
+        {
+            "name": "all",
+            "passed": ["Passed"],
+            "failed": ["Hold", "Rebase"]
+        },
+
+        {
+            "name": "change",
+            "passed": ["Passed"],
+            "needed": ["API Change", "Tx Change"],
+            "failed": ["Hold", "Rebase"]
+        },
+
+        {
+            "name": "develop",
+            "passed": ["Passed"],
+            "failed": ["API Change", "Hold", "Rebase", "Submitted", "Tx Change"]
+        }
+    ]
+}

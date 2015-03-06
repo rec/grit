@@ -16,23 +16,13 @@ from grit import Settings
 DEBUG = False
 
 def git(*args, **kwds):
-    command = ('git',) + args
-    command_disp = ' '.join(command)
-    if ARGS.verbose:
-        print('$', command_disp)
-    error, results = Call.call_value(
-        command, stderr=subprocess.STDOUT, **kwds)
-    if error:
-        raise ValueError("Can't %s, error=%s" % (command_disp, error))
-    if ARGS.verbose:
-        print(results)
-    return results
+    return Call.run(('git',) + args, **kwds)
 
 def branch(git=git):
     return git('status').splitlines()[0].split()[-1]
 
-def remove_local_branch(branch, git=git):
-    branches = [i.strip() for i in git('branch').splitlines()]
+def remove_local_branch(branch, **kwds):
+    branches = [i.strip() for i in git('branch', **kwds).splitlines()]
     if len(branches) <= 1:
         raise ValueError("Can't delete single local branch " + branch)
     if '* ' + branch in branches:
@@ -40,8 +30,8 @@ def remove_local_branch(branch, git=git):
         rotate_local_branch(git=git)
     git('branch', '-D', branch)
 
-def remove_origin_branch(branch, git=git):
-    git('push', 'origin', '--delete', branch)
+def remove_origin_branch(branch, **kwds):
+    git('push', 'origin', '--delete', branch, **kwds)
 
 def rotate_local_branch(reverse=False, **kwds):
     branches = git('branch').splitlines()
@@ -136,9 +126,9 @@ def pull_branches(user=Settings.USER):
 
     return result
 
-def branches(user=Settings.USER):
+def branches():
     result = []
-    for b in api('repos', user, Settings.PROJECT, 'branches'):
+    for b in api('repos', Settings.USER, Settings.PROJECT, 'branches'):
         result.append(b['name'])
     return result
 
@@ -153,6 +143,12 @@ def rebase_abort():
         git('rebase', '--abort', print=None)
     except:
         pass
+
+def complete_reset():
+    rebase_abort()
+    git('clean', '-f')
+    git('reset', '--hard', 'HEAD')
+
 
 def commit_id(short=True, upstream=False, branch='develop'):
     if upstream:

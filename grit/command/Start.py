@@ -63,7 +63,7 @@ Branch "%s" already exists.
 Existing branches are: %s."""
 
 def start(branch, directory=''):
-    branches = Git.branches(Settings.USER)
+    branches = Git.branches()
     if branch in branches:
         raise ValueError(_ERROR % (branch, ' '.join(branches)))
 

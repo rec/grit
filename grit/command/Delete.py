@@ -22,10 +22,10 @@ def delete(*branches):
 
     for b in branches:
         try:
-            Git.remove_local_branch(b)
+            Git.remove_local_branch(b, print=print)
         except:
             print('No local branch %s.' % b)
         try:
-            Git.remove_origin_branch(b)
+            Git.remove_origin_branch(b, print=print)
         except:
             print('No origin branch %s.' % b)

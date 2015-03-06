@@ -20,7 +20,7 @@ def write():
     open(filename(), 'w').writelines(changelog())
 
 def status_line():
-    return changelog()[-1]
+    return changelog()[-1].strip()
 
 def status(line=None):
     line = line or status_line()

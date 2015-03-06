@@ -6,6 +6,7 @@ import re
 import time
 
 from grit import Cache
+from grit import Call
 from grit import ChangeLog
 from grit import Git
 from grit import Project
@@ -29,26 +30,16 @@ _MATCHER = re.compile(
 
 SAFE = False
 
-PASS = 'Passed'
-NO_PASS = set(['API Change', 'Hold', 'Rebase', 'Submitted', 'Tx Change'])
-
 @cached
 def base_branch():
     return Project.settings('git').get('base_branch', 'develop')
 
-@cached
-def next_branch():
-    return base_branch() + '-next'
-
-@cached
-def working_branch():
-    return base_branch() + '-working'
-
-def _pull_accepted(pull):
-    return PASS in pull.labels and not NO_PASS.intersection(pull.labels)
+def _print_pulls(message, pulls):
+    if pulls:
+        print(message, String.join_words(pulls) + '.')
 
 @Git.transaction
-def _pull_request(pull):
+def _pull_request(pull, working_branch):
     if pull.user == Settings.USER:
         nickname = 'origin'
     else:
@@ -58,82 +49,59 @@ def _pull_request(pull):
             Remote.add_remote(pull.user, pull.user)
             nickname = pull.user
 
-    commits = []
-    printer = print if ARGS.verbose else None
-    def git(*args):
-        Git.git(*args, print=printer)
+    keywords = {
+        'nickname': nickname,
+        'pull_branch': pull.branch,
+        'working_branch': working_branch,
+        'print': print if ARGS.verbose else None,
+    }
 
-    git('fetch', nickname, pull.branch)
-    git('checkout', nickname + '/' + pull.branch)
-    git('rebase', '--preserve-merges', working_branch())
-    commit_id = Git.commit_id()
+    Call.runlines(
+        """git fetch {nickname} {pull_branch}
+           git checkout {nickname}/{pull_branch}
+           git rebase --preserve-merges {working_branch}""",
+        **keywords)
 
-    git('checkout', working_branch())
-    git('merge', '--ff-only', commit_id)
+    # Store the commit ID at this point so we can merge back to it.
+    keywords['commit_id'] = Git.commit_id()
+    Call.runlines(
+        """git checkout {working_branch}
+           git merge --ff-only {commit_id}""",
+        **keywords)
 
-def _make_pulls(branches):
-    branches = list(branches)
-    if not branches:
-        for number, pull in sorted(Git.pulls().items()):
-            if _pull_accepted(pull):
-                branches.append(number)
+def _release(pulls, working_branch, next_branch, selector_name):
+    Git.complete_reset()
+    Delete.delete(working_branch)
+    Git.copy_from_remote(base_branch(), working_branch)
 
-    pulls = Git.pulls()
-    try:
-        return [pulls[int(b)] for b in branches]
-    except KeyError:
-        raise ValueError('Bad pull request in ' + str(branches))
-
-def _print_long_pulls(message, pulls):
     if pulls:
-        print(message)
-        print('\n'.join(str(p) for p in pulls))
+        print('%s: Building release branch for %s:' % (
+            String.timestamp(), selector_name))
+        print('  ' + '\n  '.join(str(p) for p in pulls))
+        print()
 
-def _print_pulls(message, pulls):
-    if pulls:
-        print(message, String.join_words(pulls))
-
-def _release(pulls, previous_pulls, commit_id):
-    current_pulls = dict((p.number, p.commit_id) for p in pulls)
-    current_pulls['commit_id'] = commit_id
-    if previous_pulls == current_pulls:
-        if not ARGS.force:
-            print(String.timestamp() + ':',
-                  'No change from', ChangeLog.status_line())
-            return
-
-    previous_pulls.clear()
-    previous_pulls.update(current_pulls)
-
-    Git.rebase_abort()
-    Git.git('clean', '-f')
-    Git.git('reset', '--hard', 'HEAD')
-
-    Delete.delete(working_branch())
-    Git.copy_from_remote(base_branch(), working_branch())
-
-    _print_long_pulls(
-        String.timestamp() + ': building release branch for', pulls)
-    print()
     success = []
     failure = []
     exceptions = []
-    for p in pulls:
+    for pull in pulls:
         try:
-            print(p.number, '...', sep='', end='')
-            _pull_request(p)
+            print(pull.number, '...', sep='', end='')
+            _pull_request(pull, working_branch)
         except Exception as e:
-            failure.append(p.number)
-            print('FAILED')
+            failure.append(pull.number)
+            print('ERROR...', end='')
         else:
-            print('ok')
-            success.append(p.number)
+            success.append(pull.number)
+    if pulls:
+        print()
+        print()
 
     Version.version_commit(
         version_number=None, success=success, failure=failure)
 
     commit_id = Git.commit_id()
-    Git.force_checkout(next_branch())
+
+    Git.force_checkout(next_branch)
     Git.git('reset', '--hard', commit_id)
     Git.git('push', '-f')
 
@@ -142,16 +110,53 @@ def _release(pulls, previous_pulls, commit_id):
     _print_pulls('Proposed new develop branch %s for pull%s' %
                  (commits, plural), success)
     _print_pulls('FAILED:', failure)
-    if not (success or failure):
+    if success or failure:
+        print()
+    else:
         print(String.timestamp(), ': no pulls ready.')
 
+class PullSelector(object):
+    def __init__(self, setting):
+        self.name = setting['name']
+        self.passes = set(setting['passed']).intersection
+        self.fails = set(setting['failed']).intersection
+        try:
+            self.needed = set(setting['needed']).intersection
+        except KeyError:
+            self.needed = None
+        self.pull_dict = {}
 
-def release(*branches):
+    def accept(self, pull):
+        return (self.passes(pull.labels) and
+                not self.fails(pull.labels) and
+                not (self.needed and not self.needed(pull.labels)))
+
+    def branch(self, category):
+        return '%s-%s' % (self.name, category)
+
+    def update_pulls(self, base_commit):
+        pulls = [p for p in Git.pulls().values() if self.accept(p)]
+        pull_dict = dict((p.number, p.commit_id) for p in pulls)
+        pull_dict['base_commit'] = base_commit
+        pull_dict, self.pull_dict = self.pull_dict, pull_dict
+        if self.pull_dict == pull_dict:
+            print(String.timestamp() + ':', 'No change.')
+        else:
+            _release(
+                pulls, self.branch('working'), self.branch('next'), self.name)
+
+
+SETTINGS = Project.settings('release')
+SELECTORS = [PullSelector(s) for s in SETTINGS['selectors']]
+
+def release():
     previous_pulls = {}
     while True:
-        commit_id = Git.commit_id(upstream=True, branch=base_branch())
-        _release(_make_pulls(branches), previous_pulls, commit_id)
-        if branches or not ARGS.period:
+        base_commit = Git.commit_id(upstream=True, branch=base_branch())
+        for selector in SELECTORS:
+            selector.update_pulls(base_commit)
+        if ARGS.period:
+            time.sleep(ARGS.period)
+            Cache.clear()
+        else:
             break
-        time.sleep(ARGS.period)
-        Cache.clear()
