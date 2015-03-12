@@ -18,8 +18,10 @@ grit slack [days]
 SAFE = True
 
 def get_previous_business_day(days, date=None):
-    date = date or datetime.datetime.today()
-    while days:
+    date = date or datetime.datetime.utcnow()
+    while True:
+        if days <= 0:
+            break
         if date.weekday() < 5:
             days -= 1
         date -= datetime.timedelta(days=1)
@@ -28,28 +30,46 @@ def get_previous_business_day(days, date=None):
 def slack(days=3):
     days = int(days)
     inverse = Remote.inverse()
-    slack = Project.settings('slack')
+    slack_names = Project.settings('slack')
+    def slack(user):
+        return '@' + slack_names[user]
+
+    label_names = dict((v, k) for (k, v) in Project.settings('labels').items())
+
+    def labels_to_names(labels):
+        return ' '.join(
+            slack(label_names[i]) for i in labels if i in label_names)
 
     previous = get_previous_business_day(days)
     def match(issue):
-        if i['updated_at'] >= previous:
+        if issue['updated_at'] >= previous:
+            # print('too new:', issue['number'], issue['updated_at'], previous)
             return False
-        for label in i['labels']:
+        for label in issue['labels']:
             if label['name'] == 'Passed':
+                # print('passed:', issue['number'])
                 return False
+        # print('slack:', issue['number'])
         return True
 
+    if False:
+        import json
+        json.dump(Git.issues(), open('/tmp/git-issues.json', 'w'),
+                  sort_keys=True, indent=4, separators=(',', ': '))
     slackers = [i for i in Git.issues() if match(i)]
     if not slackers:
         return;
-    print('\nSlackers:')
+    print('\nPull requests that are over %d day%s stale:' % (
+          days, '' if days == 1 else 's'))
 
+    labels = Git.labels()
     for issue in sorted(slackers, key=operator.itemgetter('updated_at')):
         try:
-            user = '@' + slack[inverse[issue['user']['login']]]
+            user = slack(inverse[issue['user']['login']]) + ':'
             update = issue['updated_at'][:10]
             url = Open.get_url(str(issue['number']))
-            print('  %-15s: %s (%s)' % (user, url, update))
+            lab = labels_to_names(labels[issue['number']])
+            print('  %s (%s): %s (%s)' % (url, update, user, lab))
         except Exception as e:
             print('ERROR:', e)
             raise
