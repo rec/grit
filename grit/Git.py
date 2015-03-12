@@ -71,6 +71,7 @@ class Pull(object):
         self.user, self.branch = split_branch(pull['head']['label'])
         self.title = pull['title']
         self.commit_id = pull['head']['sha']
+        self.updated_at = pull['updated_at']
 
     @property
     def labels(self):

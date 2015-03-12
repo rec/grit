@@ -40,7 +40,7 @@ _OPEN_COMMANDS = {
 
 _URL = 'https://github.com/{user}/{project}/tree/{branch}/{path}'
 _COMMIT = 'https://github.com/{user}/{project}/commits/{branch}'
-_PULL = 'https://github.com/{project_user}/{project}/pull/{number}'
+PULL = 'https://github.com/{project_user}/{project}/pull/{number}'
 _NEW_PULL = 'https://github.com/{user}/{project}/compare/{branch}?expand=1'
 _DIFF = 'https://github.com/{user}/{project}/compare/{branch}'
 
@@ -73,7 +73,7 @@ def get_format_string(name, user, context):
 
     if name.isdigit():
         context['number'] = int(name)
-        return _PULL
+        return PULL
 
     if name and 'pulls'.startswith(name):
         if user == Settings.PROJECT_USER:
@@ -84,7 +84,7 @@ def get_format_string(name, user, context):
             for number, pull in Git.pulls().items():
                 if pull.branch == branch_name:
                     context['number'] = number
-                    return _PULL
+                    return PULL
             else:
                 return _NEW_PULL
 
@@ -112,7 +112,7 @@ def get_format_string(name, user, context):
     context['path'] = os.path.relpath(full_path, GitRoot.ROOT)
     return _URL
 
-def open(name='', user=''):
+def get_url(name='', user=''):
     if not platform.system() in _OPEN_COMMANDS:
         raise ValueError("Can't open a URL for platform.system() = " + plat)
 
@@ -131,4 +131,7 @@ def open(name='', user=''):
 
     context = get_context(user)
     fmt = get_format_string(name, user, context)
-    open_url(fmt.format(**context))
+    return fmt.format(**context)
+
+def open(name='', user=''):
+    open_url(get_url(name, user))

@@ -5,6 +5,7 @@ import os
 import urllib2
 
 from grit import Call
+from grit.Cache import cached
 from grit import Project
 from grit import Settings
 
@@ -44,8 +45,13 @@ def remote(user='all', nickname='', cwd=None):
             add_remote(user, nickname, cwd=cwd, existing=existing)
     return remotes
 
+@cached
+def remotes():
+    return remote()
+
+@cached
 def inverse():
-    return dict((v, k) for (k, v) in remote())
+    return dict((v, k) for (k, v) in remotes())
 
 def add_nickname(user):
     if user == Settings.USER:

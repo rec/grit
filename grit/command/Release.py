@@ -17,6 +17,7 @@ from grit.Cache import cached
 from grit.command import Delete
 from grit.command import Open
 from grit.command import Remote
+from grit.command import Slack
 from grit.command import Version
 
 HELP = """
@@ -111,6 +112,7 @@ def _release(pulls, working_branch, next_branch, selector_name):
                  (commits, plural), success)
     _print_pulls('FAILED:', failure)
     if success or failure:
+        print('---------------------------------------------')
         print()
     else:
         print(String.timestamp(), ': no pulls ready.')
@@ -139,22 +141,27 @@ class PullSelector(object):
         pull_dict = dict((p.number, p.commit_id) for p in pulls)
         pull_dict['base_commit'] = base_commit
         pull_dict, self.pull_dict = self.pull_dict, pull_dict
-        if self.pull_dict == pull_dict:
-            print(String.timestamp() + ':', 'No change.')
-        else:
+        if self.pull_dict != pull_dict:
             _release(
                 pulls, self.branch('working'), self.branch('next'), self.name)
+            return True
 
 
 SETTINGS = Project.settings('release')
-SELECTORS = [PullSelector(s) for s in SETTINGS['selectors']]
+SELECTORS = [PullSelector(s) for s in SETTINGS.get('selectors', [])]
 
 def release():
     previous_pulls = {}
     while True:
         base_commit = Git.commit_id(upstream=True, branch=base_branch())
+        success = False
         for selector in SELECTORS:
-            selector.update_pulls(base_commit)
+            success = selector.update_pulls(base_commit) or success
+
+        if success:
+            Slack.slack()
+        else:
+            print(String.timestamp(short=True) + ': no change.')
         if ARGS.period:
             time.sleep(ARGS.period)
             Cache.clear()

@@ -38,8 +38,12 @@ def join_words(words):
         return str(words[0])
     return '%s and %s' % (', '.join(str(i) for i in words[:-1]), words[-1])
 
-def timestamp():
-    return datetime.datetime.now().strftime('%a, %d %b %Y %H:%M:%S')
+def timestamp(short=False):
+    fmt = '%d/%m/%Y %H:%M:%S' if short else '%a, %d %b %Y %H:%M:%S'
+    return datetime.datetime.now().strftime(fmt)
+
+def datestamp():
+    return datetime.datetime.now().strftime('%Y%D%m')
 
 def splitlines(s):
     lines = (i.strip() for i in s.splitlines())
