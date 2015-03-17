@@ -223,6 +223,6 @@ Run tests for the project.
 
     grit t[est]
 
-Automatically called by `git clone`.
+Automatically called by `grit clone`.
 
 #
