@@ -133,11 +133,12 @@ def branches():
         result.append(b['name'])
     return result
 
-def copy_from_remote(from_branch, to_branch, remote='upstream'):
+def copy_from_remote(from_branch, to_branch, remote='upstream', push=True):
     git('checkout', from_branch)
     git('pull', remote, from_branch)
     git('checkout', '-b', to_branch)
-    git('push', '--set-upstream', 'origin', to_branch)
+    if push:
+        git('push', '--set-upstream', 'origin', to_branch)
 
 def rebase_abort():
     try:

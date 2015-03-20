@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import operator
 import os
 import random
 import re
@@ -72,8 +73,10 @@ def _pull_request(pull, working_branch):
 
 def _release(pulls, working_branch, next_branch, selector_name):
     Git.complete_reset()
-    Delete.delete(working_branch)
-    Git.copy_from_remote(base_branch(), working_branch)
+    Delete.do_delete([working_branch], print=None)
+    Git.copy_from_remote(base_branch(), working_branch, push=False)
+
+    pulls.sort(key=operator.attrgetter('number'))
 
     if pulls:
         print('%s: Building release branch for %s:' % (

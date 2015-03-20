@@ -27,7 +27,7 @@ def get_previous_business_day(days, date=None):
         date -= datetime.timedelta(days=1)
     return date.isoformat()
 
-def slack(days=3):
+def slack(days=2):
     days = int(days)
     inverse = Remote.inverse()
     slack_names = Project.settings('slack')
@@ -46,7 +46,7 @@ def slack(days=3):
             # print('too new:', issue['number'], issue['updated_at'], previous)
             return False
         for label in issue['labels']:
-            if label['name'] == 'Passed':
+            if label['name'] in ('Passed', 'Hold'):
                 # print('passed:', issue['number'])
                 return False
         # print('slack:', issue['number'])
@@ -59,7 +59,7 @@ def slack(days=3):
     slackers = [i for i in Git.issues() if match(i)]
     if not slackers:
         return;
-    print('\nPull requests that are over %d day%s stale:' % (
+    print('\nPull requests that are over %d business day%s stale:' % (
           days, '' if days == 1 else 's'))
 
     labels = Git.labels()
