@@ -40,6 +40,19 @@ def _print_pulls(message, pulls):
     if pulls:
         print(message, String.join_words(pulls) + '.')
 
+class VcxprojException(ValueError):
+    pass
+
+def _check_vcxproj():
+    # Now run scons vcxproj and see if anything changes.
+    Call.run('scons vcxproj')
+    status = Call.runlines('git status')
+    if not any(s.startswith('nothing to commit, working directory clean')):
+        # TODO: Check to see if src/soci/src/core/version.h is the only
+        # difference.
+        raise VcxprojException()
+
+
 @Git.transaction
 def _pull_request(pull, working_branch):
     if pull.user == Settings.USER:
@@ -63,6 +76,8 @@ def _pull_request(pull, working_branch):
            git checkout {nickname}/{pull_branch}
            git rebase --preserve-merges {working_branch}""",
         **keywords)
+
+    _check_vcxproj()
 
     # Store the commit ID at this point so we can merge back to it.
     keywords['commit_id'] = Git.commit_id()
@@ -91,6 +106,9 @@ def _release(pulls, working_branch, next_branch, selector_name):
         try:
             print(pull.number, '...', sep='', end='')
             _pull_request(pull, working_branch)
+        except VcxprojException:
+            failure.append(pull.number)
+            print('VCXPROJ...', end='')
         except Exception as e:
             failure.append(pull.number)
             print('ERROR...', end='')
