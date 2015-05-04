@@ -31,7 +31,7 @@ _MATCHER = re.compile(
     '([0-9a-f]{7})', re.MULTILINE)
 
 SAFE = False
-CHECK_VCXPROJ = False
+CHECK_VCXPROJ = not False
 
 @cached
 def base_branch():
@@ -44,13 +44,15 @@ def _print_pulls(message, pulls):
 class VcxprojException(ValueError):
     pass
 
+MATCH = 'nothing to commit, working directory clean'
+
 def _check_vcxproj():
     # Now run scons vcxproj and see if anything changes.
     if not CHECK_VCXPROJ:
         return
     Call.runlines('scons vcxproj')
-    status = Call.runlines('git status')
-    if not any(status.startswith('nothing to commit, working directory clean')):
+    status = Git.git('status')
+    if not MATCH in status:
         # TODO: Check to see if src/soci/src/core/version.h is the only
         # difference.
         raise VcxprojException()
@@ -80,14 +82,15 @@ def _pull_request(pull, working_branch):
            git rebase --preserve-merges {working_branch}""",
         **keywords)
 
-    _check_vcxproj()
-
     # Store the commit ID at this point so we can merge back to it.
     keywords['commit_id'] = Git.commit_id()
     Call.runlines(
         """git checkout {working_branch}
            git merge --ff-only {commit_id}""",
         **keywords)
+
+    _check_vcxproj()
+    print('???????')
 
 def _release(pulls, working_branch, next_branch, selector_name):
     Git.complete_reset()
