@@ -31,6 +31,7 @@ _MATCHER = re.compile(
     '([0-9a-f]{7})', re.MULTILINE)
 
 SAFE = False
+CHECK_VCXPROJ = False
 
 @cached
 def base_branch():
@@ -45,9 +46,11 @@ class VcxprojException(ValueError):
 
 def _check_vcxproj():
     # Now run scons vcxproj and see if anything changes.
-    Call.run('scons vcxproj')
+    if not CHECK_VCXPROJ:
+        return
+    Call.runlines('scons vcxproj')
     status = Call.runlines('git status')
-    if not any(s.startswith('nothing to commit, working directory clean')):
+    if not any(status.startswith('nothing to commit, working directory clean')):
         # TODO: Check to see if src/soci/src/core/version.h is the only
         # difference.
         raise VcxprojException()
@@ -161,10 +164,10 @@ class PullSelector(object):
         pulls = [p for p in Git.pulls().values() if self.accept(p)]
         pull_dict = dict((p.number, p.commit_id) for p in pulls)
         pull_dict['base_commit'] = base_commit
-        pull_dict, self.pull_dict = self.pull_dict, pull_dict
         if self.pull_dict != pull_dict:
-            _release(
-                pulls, self.branch('working'), self.branch('next'), self.name)
+            self.pull_dict = pull_dict
+            _release(pulls, self.branch('working'), self.branch('next'),
+                     self.name)
             return True
 
 

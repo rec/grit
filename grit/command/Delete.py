@@ -15,6 +15,8 @@ grit delete branch [branch ...]
     Use with caution.
 """
 
+PRINT = print
+
 def do_delete(branches, print=print):
     pulls = set(branches) & set(Git.pull_branches())
     if pulls:

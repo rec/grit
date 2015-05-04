@@ -162,7 +162,8 @@ def commit_id(short=True, upstream=False, branch='develop'):
 
 def force_checkout(branch):
     try:
-        git('checkout', branch, print=None)
+        # git('checkout', branch, print=None)
+        git('checkout', branch)
     except:
         git('checkout', '-b', branch)
         git('push', '--set-upstream', 'origin', branch)

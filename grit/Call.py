@@ -50,13 +50,13 @@ def call_value(command, print=print, **kwds):
 
 def run(command, print=print, **kwds):
     command_disp = ' '.join(command)
-    if ARGS.verbose:
+    if ARGS.verbose and print:
         print('$', command_disp)
     error, results = call_value(
         command, stderr=subprocess.STDOUT, print=print, **kwds)
     if error:
         raise ValueError("Can't %s, error=%s" % (command_disp, error))
-    if ARGS.verbose:
+    if ARGS.verbose and print:
         print(results)
     return results
 
