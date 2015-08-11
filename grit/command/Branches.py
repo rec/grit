@@ -26,8 +26,8 @@ grit branches [prefix]
 
     The current branch in each repository is marked with a star (*).
 
-    A branch which has a current pull request out is marked with an
-    exclamation mark (!).
+    A branch which has a current pull request out is marked with the pull
+    request number.
 """
 
 SAFE = True

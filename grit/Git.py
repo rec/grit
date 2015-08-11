@@ -121,9 +121,8 @@ def transaction(f):
 def pull_branches(user=Settings.USER):
     result = {}
     for number, pull in pulls().items():
-        u, b = split_branch(pull.branch)
-        if user and u == user:
-            result[b] = number
+        if user and pull.user == user:
+            result[pull.branch] = number
 
     return result
 
