@@ -25,7 +25,6 @@ from grit.command import Release
 from grit.command import Remake
 from grit.command import Remote
 from grit.command import Rename
-from grit.command import Rm
 from grit.command import Rotate
 from grit.command import Settings
 from grit.command import Slack
@@ -41,7 +40,7 @@ import sys
 
 _COMMANDS = CommandList(
     Amend, Branches, Clone, Delete, Explode, Help, Import, Find, Fresh, New,
-    Open, Pulls, Release, Remake, Rename, Remote, Rm, Rotate, Settings, Slack,
+    Open, Pulls, Release, Remake, Rename, Remote, Rotate, Settings, Slack,
     Start, Swap, Test, Version)
 
 _COMMANDS.register(**CD.COMMAND_LIST)

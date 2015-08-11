@@ -21,20 +21,20 @@ def git(*args, **kwds):
 def branch(git=git):
     return git('status').splitlines()[0].split()[-1]
 
-def remove_local_branch(branch, **kwds):
+def remove_local_branch(branch, git=git, **kwds):
     branches = [i.strip() for i in git('branch', **kwds).splitlines()]
     if len(branches) <= 1:
         raise ValueError("Can't delete single local branch " + branch)
     if '* ' + branch in branches:
         # It's the current branch - rotate branches.
-        rotate_local_branch(git=git)
-    git('branch', '-D', branch)
+        rotate_local_branch(git=git, **kwds)
+    git('branch', '-D', branch, **kwds)
 
 def remove_origin_branch(branch, **kwds):
     git('push', 'origin', '--delete', branch, **kwds)
 
 def rotate_local_branch(reverse=False, **kwds):
-    branches = git('branch').splitlines()
+    branches = git('branch', **kwds).splitlines()
     if len(branches) > 1:
         for i, b in enumerate(branches):
             if b.startswith('*'):
