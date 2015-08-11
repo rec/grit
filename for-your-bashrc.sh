@@ -74,7 +74,7 @@ function b--- () {
 }
 
 # top of root
-function root () {
+function rt () {
   cd `grit ^ $*`
 }
 
@@ -97,35 +97,27 @@ function new() {
   grit new $*
 }
 
-# amend
 function ga() {
-  grit a $*
+  grit amend $*
 }
 
-# amend force
 function gap() {
-  grit a -f $*
+  grit amend -f $*
 }
 
-# branches
 function gb() {
-  grit b $*
+  grit branch $*
 }
 
-# clone
 function gc() {
-  grit c $*
+  grit clone $*
 }
 
-# pushes
 function gp() {
-  grit p
+  grit pushes
 }
 
-# clone
-function gs() {
-  grit c $*
-}
+
 
 # other cd commands.
 function ..() {

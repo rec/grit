@@ -2,8 +2,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import argparse
 
-VERSION = '0.1'
-
 parser = argparse.ArgumentParser(
     description='GRIT: workflow rationalization for Git.',
 )

@@ -90,7 +90,6 @@ def _pull_request(pull, working_branch):
         **keywords)
 
     _check_vcxproj()
-    print('???????')
 
 def _release(pulls, working_branch, next_branch, selector_name):
     Git.complete_reset()
