@@ -3,8 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 
 def is_git_dir(path):
-    path = os.path.join(path, '.git')
-    return os.path.isdir(path)
+    return os.path.isdir(os.path.join(path, '.git'))
 
 def root(path=None):
     """Returns the git root recursively containing this directory, if any."""
