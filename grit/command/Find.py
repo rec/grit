@@ -3,15 +3,12 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 import sys
 
-from grit import Call
-from grit import File
-from grit import GitRoot
-from grit import Project
+from grit import Call, File, GitRoot, Project
 from grit.String import startswith
 from grit.command import Test
 
 HELP = """
-grit find prefix [-]
+grit find prefix [original-file] [-]
     Prints the next directory in the current git project that contains a file
     that starts with this prefix.
 
@@ -24,27 +21,33 @@ def _match(root, prefix):
     for dirpath, dirnames, filenames in os.walk(root):
         for d in dirnames:
             if d.startswith(prefix):
-                d = os.path.join(dirpath, d)
-                yield d, d
+                yield d, os.path.join(dirpath, d)
         if not startswith(os.path.basename(dirpath), (prefix)):
             for f in filenames:
                 if startswith(f, prefix):
-                    yield dirpath, os.path.join(f)
+                    yield dirpath, os.path.join(dirpath, f)
                     break
 
 def _print_match(match, display_root):
     print(os.path.relpath(os.path.join(*match), display_root), file=sys.stderr)
     print(match[0])
 
-def find(prefix, suffix=''):
+def find(*args):
     root = GitRoot.ROOT
     if not root:
         raise ValueError('There is no git repository here.')
-    if prefix == '-':
-        prefix, suffix = suffix, prefix
-    forward = suffix != '-'
-    if not prefix:
+    args = list(args)
+    is_forward = '-' not in args
+    if not is_forward:
+        args.remove('-')
+
+    if not args:
         raise ValueError('No file specified for find')
+
+    if len(args) < 2:
+        args.append(os.getcwd())
+
+    prefix, current = args
     settings = Project.settings('find')
     find_root = os.path.join(root, settings['find_root'])
     display_root = os.path.join(root, settings['display_root'])
@@ -55,7 +58,7 @@ def find(prefix, suffix=''):
     try:
         index = matches.index(os.getcwd())
     except ValueError:
-        _print_match(matches[0] if forward else matches[-1], display_root)
+        _print_match(matches[0] if is_forward else matches[-1], display_root)
     else:
-        _print_match(matches[(index + (1 if forward else -1)) % len(matches)],
+        _print_match(matches[(index + (1 if is_forward else -1)) % len(matches)],
                      display_root)

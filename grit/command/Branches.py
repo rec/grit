@@ -3,11 +3,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 
 from grit.Args import ARGS
-from grit import Call
-from grit import Git
-from grit import GitRoot
-from grit import Project
-from grit import Settings
+from grit import Call, Git, GitRoot, Project, Settings
 
 BRANCH_COMMAND = 'git branch'
 
