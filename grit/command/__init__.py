@@ -6,6 +6,7 @@ from . import (
     Clone,
     Delete,
     Explode,
+    EFind,
     Find,
     Fresh,
     Import,

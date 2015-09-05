@@ -1,7 +1,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os
-import sys
+import bisect, sys, os
 
 from grit import Call, File, GitRoot, Project
 from grit.String import startswith
@@ -19,29 +18,26 @@ grit efind prefix [original-file] [-]
 
 SAFE = True
 
-def _match(root, prefix):
+def match(root, prefix):
+    paths = []
     for dirpath, dirnames, filenames in os.walk(root):
         for d in dirnames:
             if d.startswith(prefix):
-                yield d, os.path.join(dirpath, d)
-        if not startswith(os.path.basename(dirpath), (prefix)):
-            for f in filenames:
-                if startswith(f, prefix):
-                    yield dirpath, os.path.join(dirpath, f)
-                    break
+                paths.append(os.path.join(dirpath, d))
+        for f in filenames:
+            if startswith(f, prefix):
+                paths.append(os.path.join(dirpath, f))
+    return sorted(paths)
 
-def _print_match(match, display_root):
-    print(os.path.relpath(os.path.join(*match), display_root), file=sys.stderr)
-    print(match[0])
 
-def find(*args):
-    root = GitRoot.ROOT
-    if not root:
-        raise ValueError('There is no git repository here.')
+def efind(*args):
     args = list(args)
     is_forward = '-' not in args
     if not is_forward:
         args.remove('-')
+
+    if '+' in args:
+        args.remove('+')
 
     if not args:
         raise ValueError('No file specified for find')
@@ -50,17 +46,23 @@ def find(*args):
         args.append(os.getcwd())
 
     prefix, current = args
+    current = current and os.path.abspath(current)
+
+    root = GitRoot.root(current)
+    if not root:
+        raise ValueError('There is no git repository here.')
+
     settings = Project.settings('find')
     find_root = os.path.join(root, settings['find_root'])
     display_root = os.path.join(root, settings['display_root'])
-    matches = sorted(list(_match(find_root, prefix)))
+    matches = match(find_root, prefix)
 
     if not matches:
-        raise ValueError("Can't find files matching prefix " + prefix)
-    try:
-        index = matches.index(os.getcwd())
-    except ValueError:
-        _print_match(matches[0] if is_forward else matches[-1], display_root)
+        open('/tmp/error.txt', 'w').write('failed to find prefix ' + prefix + ' current ' + current)
+        return
+
+    if is_forward:
+        index = bisect.bisect_right(matches, current)
     else:
-        _print_match(matches[(index + (1 if is_forward else -1)) % len(matches)],
-                     display_root)
+        index = bisect.bisect_left(matches, current) - 1
+    print(matches[index % len(matches)])
