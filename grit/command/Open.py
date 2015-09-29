@@ -7,6 +7,7 @@ import random
 from grit import Call
 from grit import Git
 from grit import GitRoot
+from grit import Project
 from grit import Settings
 from grit.String import startswith
 from grit.command import Pulls
@@ -108,7 +109,7 @@ def get_format_string(name, user, context):
                 raise ValueError("Can't find file matching " + name)
 
     if user != Settings.USER:
-        context['branch'] = 'develop'
+        context['branch'] = Project.settings.get('base_branch', 'develop')
     context['path'] = os.path.relpath(full_path, GitRoot.ROOT)
     return _URL
 

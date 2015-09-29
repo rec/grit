@@ -1,0 +1,10 @@
+{
+    "selectors": [
+        {
+            "name": "develop",
+            "passed": ["Passed"],
+            "failed": ["API Change", "Hold", "Rebase", "Squash", "Submitted",
+                       "Tx Change"]
+        }
+    ]
+}

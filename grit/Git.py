@@ -11,6 +11,7 @@ from grit.Cache import cached
 from grit import Call
 from grit import File
 from grit import GitRoot
+from grit import Project
 from grit import Settings
 
 DEBUG = False
@@ -151,7 +152,8 @@ def complete_reset():
     git('reset', '--hard', 'HEAD')
 
 
-def commit_id(short=True, upstream=False, branch='develop'):
+def commit_id(short=True, upstream=False, branch):
+    branch = branch or Project.settings.get('base_branch', 'develop')
     if upstream:
         git('fetch', 'upstream', branch)
         id = git('show-ref', 'upstream/' + branch).split()[0]
