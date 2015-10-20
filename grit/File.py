@@ -9,7 +9,7 @@ from tempfile import NamedTemporaryFile
 
 from os.path import exists, isabs, join, dirname
 
-from grit import String
+from . import String
 
 HOME = os.path.expanduser('~')
 GRIT_ROOT = dirname(dirname(__file__))

@@ -152,7 +152,7 @@ def complete_reset():
     git('reset', '--hard', 'HEAD')
 
 
-def commit_id(short=True, upstream=False, branch):
+def commit_id(short=True, upstream=False, branch=None):
     branch = branch or Project.settings.get('base_branch', 'develop')
     if upstream:
         git('fetch', 'upstream', branch)

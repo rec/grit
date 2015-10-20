@@ -7,14 +7,16 @@ def is_git_dir(path):
 
 def root(path=None):
     """Returns the git root recursively containing this directory, if any."""
+
     path = path or os.getcwd()
-    original_path = None
+    original_path = path
     last_path = None
     while path != last_path:
         if is_git_dir(path):
             return path
         last_path = path
         path = os.path.dirname(path)
+
 
 ROOT = root()
 
