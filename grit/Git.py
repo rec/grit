@@ -6,18 +6,14 @@ import subprocess
 import urllib2
 from functools import wraps
 
-from grit.Args import ARGS
-from grit.Cache import cached
-from grit import Call
-from grit import File
-from grit import GitRoot
-from grit import Project
-from grit import Settings
+from . Args import ARGS
+from . Cache import cached
+from . Call import git
+from . import File
+from . import Project
+from . import Settings
 
 DEBUG = False
-
-def git(*args, **kwds):
-    return Call.run(('git',) + args, **kwds)
 
 def branch(git=git):
     return git('status').splitlines()[0].split()[-1]

@@ -60,6 +60,9 @@ def run(command, print=print, **kwds):
         print(results)
     return results
 
+def git(*args, **kwds):
+    return run(('git',) + args, **kwds)
+
 def runlines(lines, print=print, **substitutions):
     for line in String.splitlines(lines.format(**substitutions)):
         run(line.split(), print=print)
