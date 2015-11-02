@@ -9,6 +9,12 @@ parser = argparse.ArgumentParser(
 )
 
 parser.add_argument(
+    '--all_projects', '-a',
+    action='store_true',
+    help='If true, search all branches, not just branches for this project.',
+)
+
+parser.add_argument(
     '--case_insensitive', '-i',
     action='store_true',
     help='If true, searches are case insensitive.',

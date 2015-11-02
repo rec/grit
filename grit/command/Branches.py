@@ -36,6 +36,13 @@ def branches(prefix='', *args):
     root = GitRoot.root_container()
     pulls = Git.pull_branches()
 
+    if prefix:
+        select = GitRoot.select(prefix)
+    elif ARGS.all_projects:
+        select = lambda x: True
+    else:
+        select = GitRoot.select_config()
+
     if not ARGS.expanded:
         fname = ['']
 
@@ -56,16 +63,17 @@ def branches(prefix='', *args):
         Call.for_each_directory(
             BRANCH_COMMAND,
             path=root,
-            select=GitRoot.select(prefix),
+            select=select,
             before=before,
             callback=callback)
     else:
         def before(f):
             print('\n%s:' % os.path.basename(f))
+
         Call.for_each_directory(
             BRANCH_COMMAND,
             path=root,
-            select=GitRoot.select(prefix),
+            select=select,
             before=before)
 
     if args:

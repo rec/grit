@@ -1,4 +1,7 @@
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import (
+    absolute_import, division, print_function, unicode_literals)
+
+from . import GitConfig
 
 import os
 
@@ -26,4 +29,17 @@ def root_container(path=None):
 def select(prefix=''):
     def selector(f):
         return is_git_dir(f) and os.path.basename(f).startswith(prefix)
+    return selector
+
+def config(root=ROOT):
+    path = os.path.join(root, '.git', 'config')
+    return GitConfig.split_config(open(path).readlines())
+
+def get_project(root=ROOT):
+    return GitConfig.get_project(config(root))
+
+def select_config(root=ROOT):
+    project = get_project()
+    def selector(f):
+        return is_git_dir(f) and get_project(f) == project
     return selector
