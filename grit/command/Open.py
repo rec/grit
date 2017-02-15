@@ -56,6 +56,12 @@ def get_context(user=None):
         'project': Settings.PROJECT,
     }
 
+
+import re
+
+GIT_URL_MATCHER = re.compile(r'(\w+)@(\w+\.\w+):(\w+)/(\w+)\.git').match
+
+
 def open_path(branch, path,
              project=Settings.PROJECT,
              user=Settings.USER):
@@ -108,31 +114,38 @@ def get_format_string(name, user, context):
             else:
                 raise ValueError("Can't find file matching " + name)
 
-    if user != Settings.USER:
-        context['branch'] = Project.settings.get('base_branch', 'develop')
     context['path'] = os.path.relpath(full_path, GitRoot.ROOT)
     return _URL
+
+
+
+def get_remotes():
+    remotes = {}
+    for line in Call.run(['git', 'remote', '-v']).splitlines():
+        name, url, direction = line.split()
+        account, site, user, project = GIT_URL_MATCHER(url).groups()
+        assert account == 'git' and site == 'github.com'
+        remotes[name] = user, project
+
+    return remotes
+
 
 def get_url(name='', user=''):
     if not platform.system() in _OPEN_COMMANDS:
         raise ValueError("Can't open a URL for platform.system() = " + plat)
 
-    if user and 'upstream'.startswith(user):
-        user = Settings.PROJECT_USER
-    elif name and 'upstream'.startswith(name):
-        user = Settings.PROJECT_USER
-        name = ''
-    elif user:
-        for nickname, account in Remote.remote():
-            if nickname == account:
-                user = account
-                break
-    else:
-        user = Settings.USER
-
-    context = get_context(user)
+    remotes = get_remotes()
+    origin = remotes.get('origin') or remotes.get('upstream')
+    upstream = remotes.get('upstream') or remotes.get('origin')
+    context = {
+        'branch': Git.branch(),
+        'user': origin[0],
+        'project_user': upstream[0],
+        'project': origin[1],
+    }
     fmt = get_format_string(name, user, context)
     return fmt.format(**context)
+
 
 def open(name='', user=''):
     open_url(get_url(name, user))
