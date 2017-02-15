@@ -1,7 +1,3 @@
-from __future__ import (
-    absolute_import, division, print_function, unicode_literals)
-
-
 def split_config(lines):
     def get_chunks():
         chunk = []

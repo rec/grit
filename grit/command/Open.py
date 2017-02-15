@@ -1,16 +1,11 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os
-import platform
-import random
+import os, platform, random
 
-from grit import Call
-from grit import Git
-from grit import GitRoot
-from grit import Settings
+from grit import Call, Git, GitRoot, Settings
 from grit.String import startswith
-from grit.command import Pulls
-from grit.command import Remote
+from grit.command import Pulls, Remote
+
 
 HELP = """
 grit open [filename]

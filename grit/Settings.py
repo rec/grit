@@ -6,10 +6,10 @@ from grit.GitRoot import ROOT
 
 import os
 
-DEFAULT_PROJECT = 'rippled'
+DEFAULT_PROJECT = 'BiblioPixel'
 
 # TODO: this should be a consequence of the default project.
-DEFAULT_PROJECT_USER = 'ripple'
+DEFAULT_PROJECT_USER = 'rec'
 
 _KEYS = 'GIT_USER', 'PROJECT', 'USER', 'PROJECT_USER'
 _DICTS = (

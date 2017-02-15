@@ -125,9 +125,9 @@ and runs tests on the new repo.
 
     grit c[lone] [<branch>] [<new repo name>]
 
-If branch is empty, defaults to the base_branch (which is develop for rippled).
+gIf branch is empty, defaults to the base_branch (which is develop by default).
 If the new repo name is empty, selects a next incremental name from the
-directory name - e.g. rippled -> rippled2, rippled2 -> rippled3.
+directory name - e.g. test -> test2, test2 -> test3.
 
 *Unsafe*
 
@@ -172,7 +172,7 @@ Creates a new source file in the git repository.
 Creates a new source file with C++ guards, adds it to the git repo, remakes
 the project files.
 
-Requires templates for each new filetype.  The rippled project has templates for
+Requires templates for each new filetype.  The test project has templates for
 .cpp and .h.
 
 
