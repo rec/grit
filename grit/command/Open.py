@@ -44,9 +44,14 @@ _COMMIT = 'https://github.com/{user}/{project}/commits/{branch}'
 PULL = 'https://github.com/{project_user}/{project}/pull/{number}'
 _NEW_PULL = 'https://github.com/{user}/{project}/compare/{branch}?expand=1'
 _DIFF = 'https://github.com/{user}/{project}/compare/{branch}'
+_PULL = 'https://github.com/{project_user}/{project}/compare/dev...{user}:{branch}'
+
+# https://github.com/ManiacalLabs/BiblioPixel/compare/dev...rec:dotfiles
+
 
 def open_url(url):
     Call.call('%s %s' % (_OPEN_COMMANDS[platform.system()], url))
+
 
 def get_context(user=None):
     return {
@@ -68,21 +73,48 @@ def open_path(branch, path,
     url = _URL.format(branch=branch, path=path, project=project, user=user)
     open_url(url)
 
+
 def get_commits(user=None):
     return _COMMIT.format(**get_context(user))
 
-def get_format_string(name, user, context):
-    if name and 'commits'.startswith(name):
-        return _COMMIT
 
-    if name and 'diffs'.startswith(name):
-        return _DIFF
+def get_format_string(name, user, context):
+
+    def get_url():
+        full_path = os.getcwd()
+        if name:
+            path, f = os.path.split(name)
+            full_path = os.path.join(full_path, path)
+            if not os.path.exists(full_path):
+                raise ValueError("Path %s doesn't exist." % full_path)
+            if f:
+                for p in os.listdir(full_path):
+                    if startswith(p, f):
+                        full_path = os.path.join(full_path, p)
+                        break
+                else:
+                    raise ValueError("Can't find file matching " + name)
+
+        context['path'] = os.path.relpath(full_path, GitRoot.ROOT)
+        return _URL
+
+    if not name:
+        return get_url()
 
     if name.isdigit():
         context['number'] = int(name)
         return PULL
 
-    if name and 'pulls'.startswith(name):
+    if 'commits'.startswith(name):
+        return _COMMIT
+
+    if 'diffs'.startswith(name):
+        return _DIFF
+
+    if 'pull'.startswith(name):
+        return _PULL
+
+    if 'pending'.startswith(name):
         if user == Settings.PROJECT_USER:
             return Pulls.pull_urls()[0]
 
@@ -97,26 +129,10 @@ def get_format_string(name, user, context):
 
         raise ValueError("Can't pull for user %s." % user)
 
-    if name and 'root'.startswith(name):
+    if 'root'.startswith(name):
         name = GitRoot.root()
 
-    full_path = os.getcwd()
-    if name:
-        path, f = os.path.split(name)
-        full_path = os.path.join(full_path, path)
-        if not os.path.exists(full_path):
-            raise ValueError("Path %s doesn't exist." % full_path)
-        if f:
-            for p in os.listdir(full_path):
-                if startswith(p, f):
-                    full_path = os.path.join(full_path, p)
-                    break
-            else:
-                raise ValueError("Can't find file matching " + name)
-
-    context['path'] = os.path.relpath(full_path, GitRoot.ROOT)
-    return _URL
-
+    return get_url()
 
 
 def get_remotes():
