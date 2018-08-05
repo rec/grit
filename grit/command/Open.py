@@ -64,7 +64,7 @@ def get_context(user=None):
 
 import re
 
-GIT_URL_MATCHER = re.compile(r'(\w+)@(\w+\.\w+):(\w+)/(\w+)\.git').match
+GIT_URL_MATCHER = re.compile(r'(\w+)@(\w+\.\w+):([^/]+)/([^.]+)\.git').match
 
 
 def open_path(branch, path,

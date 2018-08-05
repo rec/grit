@@ -16,11 +16,12 @@ grit explode
 def explode():
     root = GitRoot.root()
     for line in Git.git('status', '--porcelain').splitlines():
-        mode, filename = line.split()
+        mode, filename = line.split(None, 1)
+        filenames = filename.split(' -> ')
         try:
             if mode == '??':
-                Git.git('add', filename, cwd=root)
-            Git.git('commit', filename, '-m', '[fold] %s' % filename,
+                Git.git('add', *filenames, cwd=root)
+            Git.git('commit', '-m', '[fold] %s' % filenames[0], *filenames,
                     cwd=root)
         except Exception as e:
             print("ERROR: couldn't commit filename %s." % filename)
