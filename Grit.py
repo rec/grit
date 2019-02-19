@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
@@ -7,11 +7,7 @@ import sys
 import traceback
 
 from grit.Args import ARGS
-
 from grit.command import COMMANDS
-
-import os
-import sys
 
 if __name__ == '__main__':
     try:

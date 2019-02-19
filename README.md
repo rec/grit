@@ -1,3 +1,14 @@
+This is archived!
+
+I brought out the code for `grit explode` as
+[`git split`](https://github.com/rec/git-split/blob/master/git-split).
+
+To open branches or issues, use
+[`git open`](https://github.com/paulirish/git-open).
+
+Happy Gitting!
+
+
 grit
 ====
 
@@ -9,9 +20,6 @@ grit: A rationalized git workflow.
 This is a little command line tool to help programmers developing using GitHub
 and *nix.  Grit automates many common command line tasks away and makes
 navigation a breeze.
-
-This beta is aimed at Rippled C++ programmers.
-
 
 How to install
 --------------

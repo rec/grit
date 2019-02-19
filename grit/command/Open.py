@@ -43,19 +43,25 @@ _URL = 'https://github.com/{user}/{project}/tree/{branch}/{path}'
 _COMMIT = 'https://github.com/{user}/{project}/commits/{branch}'
 PULL = 'https://github.com/{project_user}/{project}/pull/{number}'
 _NEW_PULL = 'https://github.com/{user}/{project}/compare/{branch}?expand=1'
-_DIFF = 'https://github.com/{user}/{project}/compare/{branch}'
-_PULL = 'https://github.com/{project_user}/{project}/compare/dev...{user}:{branch}'
+_DIFF = 'https://github.com/{user}/{project}/compare/{dev_branch}'
+_PULL = 'https://github.com/{project_user}/{project}/compare/{dev_branch}...{user}:{branch}'
 
 # https://github.com/ManiacalLabs/BiblioPixel/compare/dev...rec:dotfiles
+DEV_BRANCHES = {
+    'BiblioPixel': 'dev',
+}
 
 
 def open_url(url):
     Call.call('%s %s' % (_OPEN_COMMANDS[platform.system()], url))
 
 
+
+
 def get_context(user=None):
     return {
         'branch': Git.branch(),
+        'dev_branch': DEV_BRANCHES.get(Settings.PROJECT, 'master'),
         'user': user or Settings.USER,
         'project_user': Settings.PROJECT_USER,
         'project': Settings.PROJECT,
@@ -155,6 +161,7 @@ def get_url(name='', user=''):
     upstream = remotes.get('upstream') or remotes.get('origin')
     context = {
         'branch': Git.branch(),
+        'dev_branch': DEV_BRANCHES.get(origin[1], 'master'),
         'user': origin[0],
         'project_user': upstream[0],
         'project': origin[1],
